@@ -1,8 +1,10 @@
+#include "toggleButton.h"
 #include <iostream>
 #include <uilibrary.h>
 
 InputBox* username = new InputBox(NULL,200,150,200,30);
 Frame* frame = new Frame(100,100,600,400);
+ToggleButton* toggle = new ToggleButton(NULL,410,195,20);
 
 LPWSTR openfile(HWND hwnd,bool save){   
     wchar_t file[100];
@@ -28,19 +30,29 @@ LPWSTR openfile(HWND hwnd,bool save){
 }
 
 void buttonClick(Button* button){
+
+  if(button->getText() == L"SIGN IN"){
+    username->disable();
+  }else{
+    PostQuitMessage(0);
+  }
    
-  PostQuitMessage(0);
 }
 
 void dotclick(Button* button){
 
   username->setText(openfile(frame->getHandle(),false));
+  
+}
+
+void changefunction(ToggleButton* togle){
+  
 }
 
 
 int main(){
 
-  frame->setBackgroundImage(L"../assets/server.jpg");
+  frame->setBackgroundImage(L"../../assets/server.jpg");
 
   frame->hasTitlebar = false;
 
@@ -49,7 +61,7 @@ int main(){
   signin->setBackgroundColor(34,108,224);
   signin->setFont(L"Roboto");
   signin->setTextSize(10);
-  // signin->onClick = pressedcallback;
+  signin->onClick = buttonClick;
 
   Button* signin1 = new Button(NULL,320,270,80,25);
   signin1->setText(L"CANCEL");
@@ -60,7 +72,7 @@ int main(){
 
   username->setFont(L"Roboto");
   username->alignCenter = true;
-  username->setBackgroundColor(0,0,0);
+  username->setBackgroundColor(0,0,0,175);
   username->setHint(L"username");
   username->setTextSize(10);
 
@@ -74,15 +86,24 @@ int main(){
   input->setFont(L"Roboto");
   input->alignCenter = true;
   input->setTextSize(10);
-  input->setBackgroundColor(0,0,0);
+  input->setBackgroundColor(0,0,0,175);
   input->setHint(L"password");
   input->hidden = true;
+
+  toggle->setBackgroundOnColor(50,200,0);
+  toggle->onChange = changefunction;
+  
+  ToggleButton* toggle2 = new ToggleButton(NULL,150,195,20);
+  toggle2->setBackgroundOnColor(255,50,0);
+  toggle2->onChange = changefunction;
   
   frame->add(signin);
   frame->add(signin1);
   frame->add(username);
   frame->add(pathlocator);
   frame->add(input);
+  frame->add(toggle);
+  frame->add(toggle2);
 
   frame->start();
 

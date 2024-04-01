@@ -16,6 +16,8 @@ class InputBox : public Element{
   int ySize;
   int textSize;
   HWND parent;
+  bool gotParentBitmap = false;
+  HBITMAP parentBitmap = NULL;
   HWND handle;
   Color backgroundColor;
   Color textColor;
@@ -25,6 +27,7 @@ class InputBox : public Element{
   std::wstring font;
   bool hover = false;
   bool isFocused = false;
+  bool disabled = false;
 
   bool stringLock = false;
 
@@ -59,7 +62,9 @@ private:
 
   void registerMouseCapure(HWND hwnd);
 
-  void updateInputBox();
+  void update();
+
+  void updateParent();
 
   void handleKeyboardEvents(HWND hwnd,WPARAM wp);
 
@@ -85,6 +90,8 @@ public:
 
   void setParent(HWND parent);
 
+  void getParentBitmap();
+
   void setText(const wchar_t* name);
   
   std::wstring getText();
@@ -95,11 +102,19 @@ public:
 
   void setTextSize(int size);
 
+  void setBackgroundColor(int r,int g,int b,int a);
+
   void setBackgroundColor(int r,int g,int b);
 
   void setBackgroundImage(const wchar_t* path);
 
   void setFont(const wchar_t* fontname);
+
+  void changePosition(int x,int y);
+
+  void disable();
+
+  void enable();
 
   bool isInputFocused();
 

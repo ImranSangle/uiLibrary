@@ -11,9 +11,38 @@
 
   }
 
-  void InputBox::updateInputBox(){
+  void InputBox::getParentBitmap(){
+     
+     if(this->parentBitmap != NULL){
+        DeleteObject(this->parentBitmap);
+    }
+     
+     HDC parentDc = GetDC(this->parent);
+     
+     HDC memoryDc = CreateCompatibleDC(parentDc);
+     this->parentBitmap = CreateCompatibleBitmap(parentDc,this->xSize,this->ySize);
+     HBITMAP oldBitmap = (HBITMAP) SelectObject(memoryDc,this->parentBitmap);
+
+     BitBlt(memoryDc,0,0,this->xSize,this->ySize,parentDc,this->xPos,this->yPos,SRCCOPY);
+
+     SelectObject(memoryDc,oldBitmap);
+     DeleteDC(memoryDc);
+     ReleaseDC(this->parent,parentDc);
+  }
+
+  void InputBox::update(){
      InvalidateRect(this->handle,NULL,TRUE);
   }
+
+  void InputBox::updateParent(){
+
+    RECT rt;
+    rt.top = this->yPos;
+    rt.left = this->xPos;
+    rt.right = this->xSize+this->xPos;
+    rt.bottom = this->ySize+this->yPos;
+    InvalidateRect(this->parent,&rt,TRUE);
+  } 
 
   void InputBox::handleKeyboardEvents(HWND hwnd,WPARAM wp){
         BYTE keyboardState[256];
@@ -26,13 +55,13 @@
           if(this->text.length() > 0){
             this->text.pop_back();
           }
-          updateInputBox();
+          update();
           if(onInput != nullptr){
              onInput(this);
           }
         }else if(asciiResult[0] > 31 && stringLock == false){ 
           this->text.push_back(asciiResult[0]);
-          updateInputBox();
+          update();
           if(onInput != nullptr){
              onInput(this);
           }
@@ -47,6 +76,10 @@
      HBITMAP oldBitmap =(HBITMAP)SelectObject(memoryDc, memoryBitmap);
 
      Graphics Graphics(memoryDc);
+
+     Bitmap bitmap(this->parentBitmap,NULL);
+
+     Graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
 
      RectF rect = {0,0,(float)this->xSize,(float)this->ySize};
 
@@ -114,6 +147,7 @@
             stringLock = true;
           }
         }
+      
       }
       
 
@@ -131,6 +165,13 @@
 
       Graphics.DrawRectangle(&pen,strokeRect);
     }
+
+
+    if(this->disabled){
+      SolidBrush disableBrush(Color(128,0,0,0));
+       
+      Graphics.FillRectangle(&disableBrush,rect);
+    }
      
      BitBlt(dc,0,0,this->xSize,this->ySize,memoryDc,0,0,SRCCOPY);
      SelectObject(memoryDc,oldBitmap);
@@ -144,7 +185,7 @@
       case WM_USER:
         if(wp == true){
           this->isFocused = false;
-          updateInputBox();
+          update();
           DestroyCaret();
         }
       break;
@@ -158,23 +199,27 @@
         }
       break;
       case WM_KEYDOWN:
-        handleKeyboardEvents(hwnd,wp);
+        if(this->disabled == false){
+          handleKeyboardEvents(hwnd,wp);
+        }
       break;
       case WM_LBUTTONDOWN:
         // if(this->isFocused == false){
-          this->isFocused = true;
-          SetFocus(hwnd);
-          updateInputBox();
+          if(this->disabled == false){
+            this->isFocused = true;
+            SetFocus(hwnd);
+            update();
+          }
         // }
         // else if(this->pressed == true && this->latchInputBox == true){
         //   this->pressed = false;
-        //   updateInputBox();
+        //   update();
         // }
       break;
       // case WM_LBUTTONUP:
       //   if(this->pressed == true && this->latchInputBox == false){
       //     this->pressed = false;
-      //     updateInputBox();
+      //     update();
       //     if(this->onClick != nullptr){
       //       onClick(this);
       //     }
@@ -182,20 +227,24 @@
       // break;
       case WM_MOUSEMOVE:
         registerMouseCapure(hwnd);
-        if(this->hover == false){
+        if(this->hover == false && this->disabled == false){
           this->hover = true;
           std::thread worker(InputBox::hoverAnimation,this);
           worker.detach();
-          // updateInputBox();
+          // update();
         }
       break;
       case WM_MOUSELEAVE:
-        if(this->hover == true){
+        if(this->hover == true && this->disabled == false){
           this->hover = false;
-          updateInputBox();
+          update();
         }
       break;
       case WM_PAINT:
+       if(this->gotParentBitmap == false){
+         getParentBitmap();
+         this->gotParentBitmap = true;
+       }
          paint(hwnd);
       break;
       case WM_ERASEBKGND:
@@ -237,7 +286,7 @@
 
   void InputBox::setText(const wchar_t* name){
      this->text = name; 
-    updateInputBox();
+    update();
   }
   
   std::wstring InputBox::getText(){
@@ -246,34 +295,60 @@
 
   void InputBox::setHint(const wchar_t* hint){
     this->hint = hint;
-    updateInputBox();
+    update();
   }
 
   void InputBox::setTextColor(int r,int g,int b){
      
      this->textColor.SetFromCOLORREF(RGB(r,g,b));
-    updateInputBox();
+    update();
   }
 
   void InputBox::setTextSize(int size){
     this->textSize = size;
-    updateInputBox();
+    update();
+  }
+
+  void InputBox::setBackgroundColor(int r,int g,int b,int a){
+
+    this->backgroundColor.SetValue(Color::MakeARGB(a, r, g, b));
+    update();
   }
 
   void InputBox::setBackgroundColor(int r,int g,int b){
-     
+
      this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
-    updateInputBox();
+     update();
   }
 
   void InputBox::setBackgroundImage(const wchar_t* path){
      this->backgroundImage = path;
-    updateInputBox();
+    update();
   }
 
   void InputBox::setFont(const wchar_t* fontname){
     this->font = fontname;
-    updateInputBox();
+    update();
+  }
+
+  void InputBox::changePosition(int x,int y){
+    
+    this->xPos = x;
+    this->yPos = y;
+    SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
+    updateParent();
+    this->gotParentBitmap = false;
+    update();
+  }
+  
+  void InputBox::disable(){
+    this->disabled = true;
+    update();
+  }
+
+  void InputBox::enable(){
+    this->disabled = false;
+    update();
   }
 
   bool InputBox::isInputFocused(){

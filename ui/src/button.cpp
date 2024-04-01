@@ -2,6 +2,8 @@
 #include <button.h>
 #include <thread>
 #include <iostream>
+#include <windef.h>
+#include <wingdi.h>
 
   void Button::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
@@ -12,17 +14,52 @@
 
   }
 
-  void Button::updateButton(){
+  void Button::getParentBitmap(){
+     
+     if(this->parentBitmap != NULL){
+        DeleteObject(this->parentBitmap);
+    }
+     
+     HDC parentDc = GetDC(this->parent);
+     
+     HDC memoryDc = CreateCompatibleDC(parentDc);
+     this->parentBitmap = CreateCompatibleBitmap(parentDc,this->xSize,this->ySize);
+     HBITMAP oldBitmap = (HBITMAP) SelectObject(memoryDc,this->parentBitmap);
+
+     BitBlt(memoryDc,0,0,this->xSize,this->ySize,parentDc,this->xPos,this->yPos,SRCCOPY);
+
+     SelectObject(memoryDc,oldBitmap);
+     DeleteDC(memoryDc);
+     ReleaseDC(this->parent,parentDc);
+  }
+
+  void Button::update(){
      InvalidateRect(this->handle,NULL,TRUE);
   }
+
+  void Button::updateParent(){
+
+    RECT rt;
+    rt.top = this->yPos;
+    rt.left = this->xPos;
+    rt.right = this->xSize+this->xPos;
+    rt.bottom = this->ySize+this->yPos;
+    InvalidateRect(this->parent,&rt,TRUE);
+  } 
 
   void Button::paint(HWND hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
-     HDC parentDc = GetDC(this->parent);
+     HDC memoryDc = CreateCompatibleDC(dc);
+     HBITMAP memoryBitmap = CreateCompatibleBitmap(dc,this->xSize,this->ySize);
+     HBITMAP oldBitmap = (HBITMAP) SelectObject(memoryDc,memoryBitmap);
 
-     Graphics Graphics(dc);
+     Graphics Graphics(memoryDc);
 
+     Bitmap bitmap(this->parentBitmap,NULL);
+
+     Graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
+  
      RectF rect = {0,0,(float)this->xSize,(float)this->ySize};
 
     if(this->backgroundImage.length() > 0){
@@ -64,6 +101,17 @@
       Graphics.FillRectangle(&backbrush,rect);
     }
 
+    if(this->disabled){
+      SolidBrush backbrush(Color(128,0,0,0));
+
+      Graphics.FillRectangle(&backbrush,rect);
+    }
+
+     BitBlt(dc,0,0,this->xSize,this->ySize,memoryDc,0,0,SRCCOPY);
+
+     SelectObject(memoryDc,oldBitmap);
+     DeleteObject(memoryBitmap);
+     DeleteDC(memoryDc);
      EndPaint(hwnd,&ps);
   }
 
@@ -73,21 +121,21 @@
         SendMessageW((HWND)wp,WM_USER,true,0);
       break;
       case WM_LBUTTONDOWN:
-        if(this->pressed == false){
+        if(this->pressed == false && this->disabled == false){
           this->pressed = true;
           SetFocus(hwnd);
-          updateButton();
+          update();
 
-        }else if(this->pressed == true && this->latchButton == true){
+        }else if(this->pressed == true && this->latchButton == true && this->disabled == false){
           this->pressed = false;
           SetFocus(hwnd);
-          updateButton();
+          update();
         }
       break;
       case WM_LBUTTONUP:
-        if(this->pressed == true && this->latchButton == false){
+        if(this->pressed == true && this->latchButton == false && this->disabled == false){
           this->pressed = false;
-          updateButton();
+          update();
           if(this->onClick != nullptr){
             onClick(this);
           }
@@ -95,7 +143,7 @@
       break;
       case WM_MOUSEMOVE:
         registerMouseCapure(hwnd);
-        if(this->hover == false){
+        if(this->hover == false && this->disabled == false){
           this->hover = true;
           std::thread worker(Button::hoverAnimation,this);
           worker.detach();
@@ -103,12 +151,16 @@
         }
       break;
       case WM_MOUSELEAVE:
-        if(this->hover == true){
+        if(this->hover == true && this->disabled == false){
           this->hover = false;
-          updateButton();
+          update();
         }
       break;
       case WM_PAINT:
+       if(this->gotParentBitmap == false){
+         getParentBitmap();
+         this->gotParentBitmap = true;
+       }
          paint(hwnd);
       break;
       case WM_ERASEBKGND:
@@ -130,13 +182,6 @@
      this->textColor.SetFromCOLORREF(RGB(255,255,255));
      this->font = L"Roboto";
      this->textSize = 12;
-
-     // this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
-     //
-     // SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
-     // SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)Button::buttonProcedure);
-     //
-     // std::cout<<"button created"<<std::endl;
   }
 
   Button::~Button(){
@@ -156,7 +201,7 @@
 
   void Button::setText(const wchar_t* name){
      this->text = name; 
-    updateButton();
+    update();
   }
 
   std::wstring Button::getText(){
@@ -166,28 +211,55 @@
   void Button::setTextColor(int r,int g,int b){
      
      this->textColor.SetFromCOLORREF(RGB(r,g,b));
-    updateButton();
+    update();
   }
 
   void Button::setTextSize(int size){
     this->textSize = size;
-    updateButton();
+    update();
+  }
+
+  void Button::setBackgroundColor(int r,int g,int b,int a){
+     
+    this->backgroundColor.SetValue(Color::MakeARGB(a,r, g, b));
+    update();
   }
 
   void Button::setBackgroundColor(int r,int g,int b){
-     
-     this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
-    updateButton();
+    
+    this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
+    update();
+
   }
 
   void Button::setBackgroundImage(const wchar_t* path){
      this->backgroundImage = path;
-    updateButton();
+    update();
   }
 
   void Button::setFont(const wchar_t* fontname){
     this->font = fontname;
-    updateButton();
+    update();
+  }
+
+  void Button::changePosition(int x,int y){
+    
+    this->xPos = x;
+    this->yPos = y;
+    SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
+    updateParent();
+    this->gotParentBitmap = false;
+    update();
+  }
+
+  void Button::disable(){
+    this->disabled = true;
+    update();
+  }
+
+  void Button::enable(){
+    this->disabled = false;
+    update();
   }
 
   bool Button::buttonState(){

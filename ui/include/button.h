@@ -16,6 +16,8 @@ class Button : public Element{
   int ySize;
   int textSize;
   HWND parent;
+  bool gotParentBitmap = false;
+  HBITMAP parentBitmap = NULL;
   HWND handle;
   Color backgroundColor;
   Color textColor;
@@ -24,6 +26,7 @@ class Button : public Element{
   std::wstring font;
   bool hover = false;
   bool pressed = false;
+  bool disabled = false;
 
 public:
   void(*onClick)(Button*) = nullptr;
@@ -53,7 +56,9 @@ private:
 
   void registerMouseCapure(HWND hwnd);
 
-  void updateButton();
+  void update();
+
+  void updateParent();
 
   void paint(HWND hwnd); 
 
@@ -77,6 +82,8 @@ public:
 
   void setParent(HWND parent) override; 
 
+  void getParentBitmap();
+
   void setText(const wchar_t* name);
 
   std::wstring getText();
@@ -85,11 +92,19 @@ public:
 
   void setTextSize(int size);
 
+  void setBackgroundColor(int r,int g,int b,int a);
+
   void setBackgroundColor(int r,int g,int b);
 
   void setBackgroundImage(const wchar_t* path);
 
   void setFont(const wchar_t* fontname);
+
+  void changePosition(int x,int y);
+
+  void disable();
+
+  void enable();
 
   bool buttonState();
 
