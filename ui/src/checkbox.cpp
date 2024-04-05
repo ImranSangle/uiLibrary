@@ -1,9 +1,9 @@
 
-#include <toggleButton.h>
+#include <checkbox.h>
 #include <thread>
 #include <iostream>
 
-  void ToggleButton::registerMouseCapure(HWND hwnd){
+  void Checkbox::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
     tme.cbSize = sizeof(TRACKMOUSEEVENT);
     tme.dwFlags = TME_LEAVE;
@@ -12,7 +12,7 @@
 
   }
   
-  void ToggleButton::getParentBitmap(){
+  void Checkbox::getParentBitmap(){
      
      if(this->parentBitmap != NULL){
         DeleteObject(this->parentBitmap);
@@ -31,11 +31,11 @@
      ReleaseDC(this->parent,parentDc);
   }
 
-  void ToggleButton::update(){
+  void Checkbox::update(){
      InvalidateRect(this->handle,NULL,TRUE);
   }
 
-  void ToggleButton::updateParent(){
+  void Checkbox::updateParent(){
 
     RECT rt;
     rt.top = this->yPos;
@@ -45,16 +45,7 @@
     InvalidateRect(this->parent,&rt,TRUE);
   } 
 
-  void ToggleButton::DrawCircle(Graphics& graphics,SolidBrush& brush,const Point& center, float radius){
-      // Calculate the top-left corner of the bounding rectangle
-      float x = center.X - radius;
-      float y = center.Y - radius;
-
-      RectF boundingRect(x, y, 2 * radius, 2 * radius);
-      graphics.FillEllipse(&brush,boundingRect);
-  }
-
-  void ToggleButton::paint(HWND hwnd){      
+  void Checkbox::paint(HWND hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
      HDC memoryDc = CreateCompatibleDC(dc);
@@ -69,53 +60,44 @@
 
      graphics.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 
-     Rect rect = {2,2,this->xSize-4,this->ySize-4};
+     Rect rect = {0,0,this->xSize,this->ySize};
 
-     int borderRadius = rect.Height/2; // Adjust border radius as needed
-
-     GraphicsPath path;
-     path.AddArc(rect.X, rect.Y, 2 * borderRadius, 2 * borderRadius, 90, 180); // Left arc
-     path.AddArc(rect.GetRight() - 2 * borderRadius, rect.Y, 2 * borderRadius, 2 * borderRadius, 270, 180); // Right arc
-     path.CloseFigure();
-
-     Pen toggleStroke(Color(255,255,255),1);
+     Pen toggleStroke(Color(200,200,200),1);
 
      if(switchOn){
        SolidBrush onBrush(this->backgroundOnColor);
-       graphics.FillPath(&onBrush,&path);
+       graphics.FillRectangle(&onBrush,rect);
      }else{
        SolidBrush offBrush(Color(this->backgroundOffColor));
-       graphics.FillPath(&offBrush,&path);
+       graphics.FillRectangle(&offBrush,rect);
      }
 
-    float knobRadius = borderRadius-this->ySize/6.0f;
 
     if(this->hover){
 
-      // SolidBrush hoverBrush(Color(75,255,255,255));
+      // SolidBrush hoverBrush(Color(70,255,255,255));
       //
-      // graphics.FillPath(&hoverBrush,&path);
-      
-      knobRadius = borderRadius-this->ySize/10.0f;
+      // graphics.FillRectangle(&hoverBrush,rect);
       
     }
 
     if(this->switchOn){
-      SolidBrush knobOnBrush(Color(255,255,255));
-      Point center((this->ySize/2)+(this->xSize/2),this->ySize/2);
-      DrawCircle(graphics,knobOnBrush,center,knobRadius);
+      Pen tickPen(Color(255,255,255),1.5);
+      SolidBrush tempbrush(Color(128,0,0,0));
+      int innerWidth = this->xSize/6;
+      Rect tickRectangle = {innerWidth,innerWidth,this->xSize-(innerWidth*2),this->ySize-(innerWidth*2)};
+      // graphics.FillRectangle(&tempbrush,tickRectangle);
+      graphics.DrawLine(&tickPen,innerWidth,this->ySize/1.5,this->xSize/2.5,tickRectangle.Width+innerWidth);
+      graphics.DrawLine(&tickPen,this->xSize/2.5,tickRectangle.Width+innerWidth,tickRectangle.Width+innerWidth,tickRectangle.GetTop()+innerWidth);
     }else{
-      SolidBrush knobOffBrush(Color(200,200,200));
-      Point center(this->ySize/2,this->ySize/2);
-      DrawCircle(graphics,knobOffBrush,center,knobRadius);
-      graphics.DrawPath(&toggleStroke,&path);
+      graphics.DrawRectangle(&toggleStroke,0,0,rect.Width-1.5,rect.Height-1.5);
     }
 
 
     if(this->disabled){
       SolidBrush disabledBrush(Color(128,0,0,0));
 
-      graphics.FillPath(&disabledBrush,&path);
+      graphics.FillRectangle(&disabledBrush,rect);
     }
      
      BitBlt(dc,0,0,this->xSize,this->ySize,memoryDc,0,0,SRCCOPY);
@@ -126,7 +108,7 @@
      EndPaint(hwnd,&ps);
   }
 
-  LRESULT CALLBACK ToggleButton::callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
+  LRESULT CALLBACK Checkbox::callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
       switch(msg){
       case WM_SETFOCUS:
         SendMessageW((HWND)wp,WM_USER,true,0);
@@ -152,7 +134,7 @@
         if(this->hover == false && this->disabled == false){
           registerMouseCapure(hwnd);
           this->hover = true;
-          std::thread worker(ToggleButton::hoverAnimation,this);
+          std::thread worker(Checkbox::hoverAnimation,this);
           worker.detach();
           update();
         }
@@ -179,45 +161,45 @@
   }
   
 
-  ToggleButton::ToggleButton(HWND hwnd,int x,int y,int size){
+  Checkbox::Checkbox(HWND hwnd,int x,int y,int size){
      this->xPos = x;
      this->yPos = y;
-     this->xSize = size*2;
+     this->xSize = size;
      this->ySize = size;
      this->parent = hwnd;
      this->backgroundOnColor.SetFromCOLORREF(RGB(34,108,224));
      this->backgroundOffColor.SetFromCOLORREF(RGB(50,50,50));
   }
 
-  ToggleButton::~ToggleButton(){
+  Checkbox::~Checkbox(){
      DestroyWindow(this->parent);
-     std::cout<<"ToggleButton destroyed"<<std::endl;
+     std::cout<<"Checkbox destroyed"<<std::endl;
   }
 
-  void ToggleButton::setParent(HWND parent){
+  void Checkbox::setParent(HWND parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
 
       SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
-      SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)ToggleButton::callbackProcedure);
+      SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)Checkbox::callbackProcedure);
 
-      std::cout<<"toggleButton created"<<std::endl;
+      std::cout<<"Checkbox created"<<std::endl;
   }
 
 
-  void ToggleButton::setBackgroundOnColor(int r,int g,int b){
+  void Checkbox::setBackgroundOnColor(int r,int g,int b,int a){
      
-     this->backgroundOnColor.SetFromCOLORREF(RGB(r,g,b));
+      this->backgroundOnColor.SetValue(Color::MakeARGB(a, r, g, b));
     update();
   }
 
-  void ToggleButton::setBackgroundOffColor(int r,int g,int b){
+  void Checkbox::setBackgroundOffColor(int r,int g,int b,int a){
      
-     this->backgroundOffColor.SetFromCOLORREF(RGB(r,g,b));
+      this->backgroundOffColor.SetValue(Color::MakeARGB(a, r, g, b));
     update();
   }
 
-  void ToggleButton::changePosition(int x,int y){
+  void Checkbox::changePosition(int x,int y){
     
     this->xPos = x;
     this->yPos = y;
@@ -227,16 +209,16 @@
     update();
   }
 
-  void ToggleButton::disable(){
+  void Checkbox::disable(){
     this->disabled = true;
     update();
   }
 
-  void ToggleButton::enable(){
+  void Checkbox::enable(){
     this->disabled = false;
     update();
   }
 
-  bool ToggleButton::buttonState(){
+  bool Checkbox::buttonState(){
     return this->switchOn;
   } 

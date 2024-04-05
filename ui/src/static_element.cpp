@@ -1,11 +1,9 @@
 
-#include <button.h>
+#include <static_element.h>
 #include <thread>
 #include <iostream>
-#include <windef.h>
-#include <wingdi.h>
 
-  void Button::registerMouseCapure(HWND hwnd){
+  void StaticElement::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
     tme.cbSize = sizeof(TRACKMOUSEEVENT);
     tme.dwFlags = TME_LEAVE;
@@ -14,7 +12,7 @@
 
   }
 
-  void Button::getParentBitmap(){
+  void StaticElement::getParentBitmap(){
      
      if(this->parentBitmap != NULL){
         DeleteObject(this->parentBitmap);
@@ -33,11 +31,11 @@
      ReleaseDC(this->parent,parentDc);
   }
 
-  void Button::update(){
+  void StaticElement::update(){
      InvalidateRect(this->handle,NULL,TRUE);
   }
 
-  void Button::updateParent(){
+  void StaticElement::updateParent(){
 
     RECT rt;
     rt.top = this->yPos;
@@ -47,18 +45,18 @@
     InvalidateRect(this->parent,&rt,TRUE);
   } 
 
-  void Button::paint(HWND hwnd){      
+  void StaticElement::paint(HWND hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
      HDC memoryDc = CreateCompatibleDC(dc);
      HBITMAP memoryBitmap = CreateCompatibleBitmap(dc,this->xSize,this->ySize);
      HBITMAP oldBitmap = (HBITMAP) SelectObject(memoryDc,memoryBitmap);
 
-     Graphics Graphics(memoryDc);
+     Graphics graphics(memoryDc);
 
      Bitmap bitmap(this->parentBitmap,NULL);
 
-     Graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
+     graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
   
      RectF rect = {0,0,(float)this->xSize,(float)this->ySize};
 
@@ -66,13 +64,13 @@
 
       Bitmap bitmap(this->backgroundImage.c_str());
 
-      Graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
+      graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
        
     }else{
 
       SolidBrush backbrush(this->backgroundColor);
       
-      Graphics.FillRectangle(&backbrush,rect);
+      graphics.FillRectangle(&backbrush,rect);
 
     }
 
@@ -82,31 +80,29 @@
 
      StringFormat format;
      
-     format.SetAlignment(StringAlignmentCenter);
-     
      format.SetLineAlignment(StringAlignmentCenter);
 
-     Graphics.DrawString(this->text.c_str(),-1,&font,rect,&format,&brush);
+     graphics.DrawString(this->text.c_str(),-1,&font,rect,&format,&brush);
 
-    if(this->hover){
-
-      SolidBrush backbrush(Color(75,255,255,255));
-
-      Graphics.FillRectangle(&backbrush,rect);
-    }
-    
-    if(this->pressed){
-      SolidBrush backbrush(Color(100,255,255,255));
-
-      Graphics.FillRectangle(&backbrush,rect);
-    }
 
     if(this->disabled){
       SolidBrush backbrush(Color(128,0,0,0));
 
-      Graphics.FillRectangle(&backbrush,rect);
+      graphics.FillRectangle(&backbrush,rect);
     }
-
+     
+     if(this->autoResize){
+       RectF mesureRect;
+       graphics.MeasureString(this->text.c_str(),-1,&font,PointF(0,0),&mesureRect);
+       this->xSize = mesureRect.Width;
+       this->ySize = mesureRect.Height;
+       SetWindowPos(this->handle,NULL,this->xPos,this->yPos,this->xSize,this->ySize,SWP_NOZORDER);
+       updateParent();
+       this->gotParentBitmap = false;
+       update();
+       this->autoResize = false;
+     }
+  
      BitBlt(dc,0,0,this->xSize,this->ySize,memoryDc,0,0,SRCCOPY);
 
      SelectObject(memoryDc,oldBitmap);
@@ -115,7 +111,7 @@
      EndPaint(hwnd,&ps);
   }
 
-  LRESULT CALLBACK Button::callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
+  LRESULT CALLBACK StaticElement::callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
       switch(msg){
       case WM_SETFOCUS:
         SendMessageW((HWND)wp,WM_USER,true,0);
@@ -146,8 +142,6 @@
         registerMouseCapure(hwnd);
         if(this->hover == false && this->disabled == false){
           this->hover = true;
-          std::thread worker(Button::hoverAnimation,this);
-          worker.detach();
           // updateButton();
         }
       break;
@@ -173,7 +167,7 @@
   }
   
 
-  Button::Button(HWND hwnd,int x,int y,int cx,int cy){
+  StaticElement::StaticElement(HWND hwnd,int x,int y,int cx,int cy){
      this->xPos = x;
      this->yPos = y;
      this->xSize = cx;
@@ -185,65 +179,66 @@
      this->textSize = 12;
   }
 
-  Button::~Button(){
+  StaticElement::~StaticElement(){
      DestroyWindow(this->parent);
-     std::cout<<"button destroyed"<<std::endl;
+     std::cout<<"StaticElement destroyed"<<std::endl;
   }
 
-  void Button::setParent(HWND parent){
+  void StaticElement::setParent(HWND parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
 
       SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
-      SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)Button::callbackProcedure);
+      SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)StaticElement::callbackProcedure);
 
-      std::cout<<"button created"<<std::endl;
+      std::cout<<"StaticElement created"<<std::endl;
   }
 
-  void Button::setText(const std::wstring& name){
-     this->text = name; 
+  void StaticElement::setText(const std::wstring& name){
+    this->text = name; 
+    this->autoResize = true; 
     update();
   }
 
-  std::wstring Button::getText(){
+  std::wstring StaticElement::getText(){
      return this->text;
   }
 
-  void Button::setTextColor(int r,int g,int b){
+  void StaticElement::setTextColor(int r,int g,int b){
      
      this->textColor.SetFromCOLORREF(RGB(r,g,b));
     update();
   }
 
-  void Button::setTextSize(int size){
+  void StaticElement::setTextSize(int size){
     this->textSize = size;
     update();
   }
 
-  void Button::setBackgroundColor(int r,int g,int b,int a){
+  void StaticElement::setBackgroundColor(int r,int g,int b,int a){
      
     this->backgroundColor.SetValue(Color::MakeARGB(a,r, g, b));
     update();
   }
 
-  void Button::setBackgroundColor(int r,int g,int b){
+  void StaticElement::setBackgroundColor(int r,int g,int b){
     
     this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
     update();
 
   }
 
-  void Button::setBackgroundImage(const std::wstring& path){
+  void StaticElement::setBackgroundImage(const wchar_t* path){
      this->backgroundImage = path;
     update();
   }
 
-  void Button::setFont(const std::wstring& fontname){
+  void StaticElement::setFont(const wchar_t* fontname){
     this->font = fontname;
     update();
   }
 
-  void Button::changePosition(int x,int y){
+  void StaticElement::changePosition(int x,int y){
     
     this->xPos = x;
     this->yPos = y;
@@ -253,16 +248,12 @@
     update();
   }
 
-  void Button::disable(){
+  void StaticElement::disable(){
     this->disabled = true;
     update();
   }
 
-  void Button::enable(){
+  void StaticElement::enable(){
     this->disabled = false;
     update();
-  }
-
-  bool Button::buttonState(){
-    return this->pressed;
   }

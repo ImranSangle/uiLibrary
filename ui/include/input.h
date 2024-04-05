@@ -62,6 +62,8 @@ private:
 
   void registerMouseCapure(HWND hwnd);
 
+  void getParentBitmap();
+
   void update();
 
   void updateParent();
@@ -70,13 +72,13 @@ private:
 
   void paint(HWND hwnd); 
 
-  LRESULT CALLBACK inputProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
-  
-  static LRESULT CALLBACK inputProcedure(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
+  LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
+
+  static LRESULT CALLBACK callbackProcedure(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
       InputBox* input = (InputBox*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
 
       if(input != nullptr){
-         return input->inputProcedureImplementation(hwnd, msg, wp, lp);
+         return input->callbackProcedureImplementation(hwnd, msg, wp, lp);
       }else{
          return DefWindowProcW(hwnd, msg, wp, lp);
       }
@@ -90,13 +92,11 @@ public:
 
   void setParent(HWND parent);
 
-  void getParentBitmap();
-
-  void setText(const wchar_t* name);
+  void setText(const std::wstring& name);
   
   std::wstring getText();
 
-  void setHint(const wchar_t* hint);
+  void setHint(const std::wstring& hint);
 
   void setTextColor(int r,int g,int b);
 
@@ -106,9 +106,9 @@ public:
 
   void setBackgroundColor(int r,int g,int b);
 
-  void setBackgroundImage(const wchar_t* path);
+  void setBackgroundImage(const std::wstring& path);
 
-  void setFont(const wchar_t* fontname);
+  void setFont(const std::wstring& fontname);
 
   void changePosition(int x,int y);
 

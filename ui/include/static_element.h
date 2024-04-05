@@ -8,7 +8,7 @@
 
 using namespace Gdiplus;
 
-class Button : public Element{
+class StaticElement : public Element{
   private:
   int xPos;
   int yPos;
@@ -27,32 +27,12 @@ class Button : public Element{
   bool hover = false;
   bool pressed = false;
   bool disabled = false;
+  bool autoResize = false;
 
 public:
-  void(*onClick)(Button*) = nullptr;
+  void(*onClick)(StaticElement*) = nullptr;
   bool latchButton = false;
 private:
-
-  static void hoverAnimation(Button* object){
-
-     HDC dc = GetDC(object->handle);
-      
-     Graphics graphics(dc);
-
-     Rect rect = {0,0,object->xSize,object->ySize};
-
-     SolidBrush backbrush(Color(7,255,255,255));
-
-     for(int i =0;i<10;i++){
-      if(object->hover == false){
-        return;
-      }
-        graphics.FillRectangle(&backbrush,rect);
-        Sleep(1);
-      }
-
-     ReleaseDC(object->handle,dc);
-  }
 
   void registerMouseCapure(HWND hwnd);
 
@@ -67,10 +47,10 @@ private:
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
   
   static LRESULT CALLBACK callbackProcedure(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
-      Button* button = (Button*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
+      StaticElement* staticElement = (StaticElement*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
 
-      if(button != nullptr){
-         return button->callbackProcedureImplementation(hwnd, msg, wp, lp);
+      if(staticElement != nullptr){
+         return staticElement->callbackProcedureImplementation(hwnd, msg, wp, lp);
       }else{
          return DefWindowProcW(hwnd, msg, wp, lp);
       }
@@ -78,9 +58,9 @@ private:
 
 public: 
 
-  Button(HWND hwnd,int x,int y,int cx,int cy);
+  StaticElement(HWND hwnd,int x,int y,int cx,int cy);
 
-  ~Button();
+  ~StaticElement();
 
   void setParent(HWND parent) override; 
 
@@ -96,16 +76,14 @@ public:
 
   void setBackgroundColor(int r,int g,int b);
 
-  void setBackgroundImage(const std::wstring& path);
+  void setBackgroundImage(const wchar_t* path);
 
-  void setFont(const std::wstring& fontname);
+  void setFont(const wchar_t* fontname);
 
   void changePosition(int x,int y);
 
   void disable();
 
   void enable();
-
-  bool buttonState();
 
 };

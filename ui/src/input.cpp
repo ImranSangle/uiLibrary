@@ -180,7 +180,7 @@
      EndPaint(hwnd,&ps);
   }
 
-  LRESULT CALLBACK InputBox::inputProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
+  LRESULT CALLBACK InputBox::callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
       switch(msg){
       case WM_USER:
         if(wp == true){
@@ -255,7 +255,6 @@
      return (LRESULT) nullptr;
   }
   
-
   InputBox::InputBox(HWND hwnd,int x,int y,int cx,int cy){
      this->xPos = x;
      this->yPos = y;
@@ -279,12 +278,12 @@
      this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
 
      SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
-     SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)InputBox::inputProcedure);
+     SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)InputBox::callbackProcedure);
 
      std::cout<<"inputbox created"<<std::endl;
   }
 
-  void InputBox::setText(const wchar_t* name){
+  void InputBox::setText(const std::wstring& name){
      this->text = name; 
     update();
   }
@@ -293,7 +292,7 @@
       return this->text;
   }
 
-  void InputBox::setHint(const wchar_t* hint){
+  void InputBox::setHint(const std::wstring& hint){
     this->hint = hint;
     update();
   }
@@ -321,12 +320,12 @@
      update();
   }
 
-  void InputBox::setBackgroundImage(const wchar_t* path){
+  void InputBox::setBackgroundImage(const std::wstring& path){
      this->backgroundImage = path;
     update();
   }
 
-  void InputBox::setFont(const wchar_t* fontname){
+  void InputBox::setFont(const std::wstring& fontname){
     this->font = fontname;
     update();
   }

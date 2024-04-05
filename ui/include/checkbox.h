@@ -7,7 +7,7 @@
 
 using namespace Gdiplus;
 
-class ToggleButton : public Element{
+class Checkbox : public Element{
   private:
   int xPos;
   int yPos;
@@ -24,10 +24,10 @@ class ToggleButton : public Element{
   bool disabled = false;
 
 public:
-  void(*onChange)(ToggleButton*) = nullptr;
+  void(*onChange)(Checkbox*) = nullptr;
 private:
 
-  static void hoverAnimation(ToggleButton* object){
+  static void hoverAnimation(Checkbox* object){
 
      HDC dc = GetDC(object->handle);
       
@@ -35,14 +35,7 @@ private:
 
      graphics.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 
-     Rect rect = {4,4,object->xSize-8,object->ySize-8};
-
-     int borderRadius = rect.Height/2; // Adjust border radius as needed
-
-     GraphicsPath path;
-     path.AddArc(rect.X, rect.Y, 2 * borderRadius, 2 * borderRadius, 90, 180); // Left arc
-     path.AddArc(rect.GetRight() - 2 * borderRadius, rect.Y, 2 * borderRadius, 2 * borderRadius, 270, 180); // Right arc
-     path.CloseFigure();
+     Rect rect = {0,0,object->xSize,object->ySize};
 
      SolidBrush backbrush(Color(7,255,255,255));
 
@@ -50,7 +43,7 @@ private:
       if(object->hover == false){
         return;
       }
-        graphics.FillPath(&backbrush,&path);
+        graphics.FillRectangle(&backbrush,rect);
         Sleep(1);
       }
 
@@ -65,17 +58,15 @@ private:
 
   void updateParent();
 
-  void DrawCircle(Graphics&,SolidBrush&,const Point&,float);
-
   void paint(HWND hwnd); 
 
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
   
   static LRESULT CALLBACK callbackProcedure(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
-      ToggleButton* togglebutton = (ToggleButton*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
+      Checkbox* checkbox = (Checkbox*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
 
-      if(togglebutton != nullptr){
-         return togglebutton->callbackProcedureImplementation(hwnd, msg, wp, lp);
+      if(checkbox != nullptr){
+         return checkbox->callbackProcedureImplementation(hwnd, msg, wp, lp);
       }else{
          return DefWindowProcW(hwnd, msg, wp, lp);
       }
@@ -83,15 +74,15 @@ private:
 
 public: 
 
-  ToggleButton(HWND hwnd,int x,int y,int size);
+  Checkbox(HWND hwnd,int x,int y,int size);
 
-  ~ToggleButton();
+  ~Checkbox();
 
   void setParent(HWND parent) override; 
 
-  void setBackgroundOnColor(int r,int g,int b);
+  void setBackgroundOnColor(int r,int g,int b,int a);
 
-  void setBackgroundOffColor(int r,int g,int b);
+  void setBackgroundOffColor(int r,int g,int b,int a);
 
   void changePosition(int x,int y);
 

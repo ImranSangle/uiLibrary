@@ -38,15 +38,18 @@
     switch(msg){
       case WM_NCHITTEST:
         {
-          POINT pt;
-           pt.x = GET_X_LPARAM(lp);
-           pt.y = GET_Y_LPARAM(lp);
-          if(WindowFromPoint(pt) == hwnd){
-             return HTCAPTION;
-          }else{
-             return DefWindowProcW(hwnd,msg,wp,lp);
-          }
+            POINT pt;
+             pt.x = GET_X_LPARAM(lp);
+             pt.y = GET_Y_LPARAM(lp);
+            if(WindowFromPoint(pt) == hwnd){
+               return HTCAPTION;
+            }else{
+               return DefWindowProcW(hwnd,msg,wp,lp);
+            }
         }
+      break;
+      case WM_LBUTTONDOWN:
+        SetFocus(hwnd);
       break;
       case WM_USER:
         if(wp == true){
@@ -60,7 +63,6 @@
         }
       break;
       case WM_SIZE:
-        InvalidateRect(hwnd,NULL,TRUE);
       break;
       case WM_PAINT:
         this->paint(hwnd);
@@ -78,11 +80,12 @@
     return (LRESULT) nullptr;
   }
 
-  Frame::Frame(int x,int y,int cx,int cy){
+  Frame::Frame(int x,int y,int cx,int cy,bool titlebar){
     this->xPos = x;
     this->yPos = y;
     this->xSize = cx;
     this->ySize = cy;
+    this->hasTitlebar = titlebar;
 
     GdiplusStartupInput gdiplusStartupInput;
     GdiplusStartup(&(this->gdiplusToken),&gdiplusStartupInput,NULL);
@@ -144,4 +147,12 @@
   
   HWND Frame::getHandle(){
      return this->handle;
+  }
+
+  int Frame::width(){
+     return this->xSize;
+  }
+
+  int Frame::height(){
+     return this->ySize;
   }

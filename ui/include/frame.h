@@ -45,7 +45,7 @@ private:
 
 public:
 
-  Frame(int x,int y,int cx,int cy);
+  Frame(int x,int y,int cx,int cy,bool titlebar);
 
   ~Frame();
 
@@ -58,5 +58,9 @@ public:
   void setBackgroundImage(const wchar_t* path);
 
   HWND getHandle();
+
+  int width(); 
+  
+  int height();
 
 };

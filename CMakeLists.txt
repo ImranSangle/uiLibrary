@@ -11,7 +11,9 @@ endif()
 
 add_library(uiLibrary STATIC 
 ui/src/button.cpp
+ui/src/static_element.cpp
 ui/src/toggleButton.cpp
+ui/src/checkbox.cpp
 ui/src/input.cpp
 ui/src/frame.cpp
 ui/src/element.cpp
