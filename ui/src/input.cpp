@@ -44,6 +44,13 @@
     InvalidateRect(this->parent,&rt,TRUE);
   } 
 
+  void InputBox::fullUpdate(){
+    
+     updateParent();
+     this->gotParentBitmap = false;
+     update();
+  }
+
   void InputBox::handleKeyboardEvents(HWND hwnd,WPARAM wp){
         BYTE keyboardState[256];
         GetKeyboardState(keyboardState);
@@ -75,11 +82,11 @@
      HBITMAP memoryBitmap = CreateCompatibleBitmap(dc,this->xSize,this->ySize);
      HBITMAP oldBitmap =(HBITMAP)SelectObject(memoryDc, memoryBitmap);
 
-     Graphics Graphics(memoryDc);
+     Graphics graphics(memoryDc);
 
      Bitmap bitmap(this->parentBitmap,NULL);
 
-     Graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
+     graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
 
      RectF rect = {0,0,(float)this->xSize,(float)this->ySize};
 
@@ -87,13 +94,13 @@
 
       Bitmap bitmap(this->backgroundImage.c_str());
 
-      Graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
+      graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
        
     }else{
 
       SolidBrush backbrush(this->backgroundColor);
       
-      Graphics.FillRectangle(&backbrush,rect);
+      graphics.FillRectangle(&backbrush,rect);
 
     }
 
@@ -103,6 +110,8 @@
 
      StringFormat format(StringFormatFlagsLineLimit);
      
+     graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
+
      if(this->alignCenter){
        format.SetAlignment(StringAlignmentCenter);
     }
@@ -111,18 +120,18 @@
 
       if(this->text.length() == 0){
        SolidBrush hintBrush(Color(128,255,255,255));
-       Graphics.DrawString(this->hint.c_str(),-1,&font,rect,&format,&hintBrush);
+       graphics.DrawString(this->hint.c_str(),-1,&font,rect,&format,&hintBrush);
       }
 
       RectF stringRect;
 
       if(this->hidden == true){
         std::wstring hiddenstring(this->text.length(),L'*');
-        Graphics.DrawString(hiddenstring.c_str(),-1,&font,rect,&format,&brush);
-        Graphics.MeasureString(hiddenstring.c_str(),-1,&font,PointF(0,0),&stringRect);
+        graphics.DrawString(hiddenstring.c_str(),-1,&font,rect,&format,&brush);
+        graphics.MeasureString(hiddenstring.c_str(),-1,&font,PointF(0,0),&stringRect);
       }else{
-        Graphics.DrawString(this->text.c_str(),-1,&font,rect,&format,&brush);
-        Graphics.MeasureString(this->text.c_str(),-1,&font,PointF(0,0),&stringRect);
+        graphics.DrawString(this->text.c_str(),-1,&font,rect,&format,&brush);
+        graphics.MeasureString(this->text.c_str(),-1,&font,PointF(0,0),&stringRect);
       }
 
 
@@ -155,22 +164,22 @@
 
       SolidBrush backbrush(Color(50,255,255,255));
 
-      Graphics.FillRectangle(&backbrush,rect);
+      graphics.FillRectangle(&backbrush,rect);
     }
      
     if(this->isFocused){
 
       Pen pen(Color(255,255,255),2);
       Rect strokeRect = {0,0,this->xSize,this->ySize};
-
-      Graphics.DrawRectangle(&pen,strokeRect);
+      
+      graphics.DrawRectangle(&pen,strokeRect);
     }
 
 
     if(this->disabled){
       SolidBrush disableBrush(Color(128,0,0,0));
        
-      Graphics.FillRectangle(&disableBrush,rect);
+      graphics.FillRectangle(&disableBrush,rect);
     }
      
      BitBlt(dc,0,0,this->xSize,this->ySize,memoryDc,0,0,SRCCOPY);
@@ -273,6 +282,22 @@
      std::cout<<"inputbox destroyed"<<std::endl;
   }
 
+  int InputBox::getX(){
+     return this->xPos;
+  }
+
+  int InputBox::getY(){
+     return this->yPos;
+  }
+
+  int InputBox::getWidth(){
+     return this->xSize;
+  }
+
+  int InputBox::getHeight(){
+     return this->ySize;
+  }
+
   void InputBox::setParent(HWND parent){
      this->parent = parent;
      this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
@@ -335,9 +360,7 @@
     this->xPos = x;
     this->yPos = y;
     SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    updateParent();
-    this->gotParentBitmap = false;
-    update();
+    fullUpdate();
   }
   
   void InputBox::disable(){

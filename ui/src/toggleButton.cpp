@@ -45,6 +45,13 @@
     InvalidateRect(this->parent,&rt,TRUE);
   } 
 
+  void ToggleButton::fullUpdate(){
+    
+     updateParent();
+     this->gotParentBitmap = false;
+     update();
+  }
+
   void ToggleButton::DrawCircle(Graphics& graphics,SolidBrush& brush,const Point& center, float radius){
       // Calculate the top-left corner of the bounding rectangle
       float x = center.X - radius;
@@ -194,6 +201,22 @@
      std::cout<<"ToggleButton destroyed"<<std::endl;
   }
 
+  int ToggleButton::getX(){
+     return this->xPos;
+  }
+
+  int ToggleButton::getY(){
+     return this->yPos;
+  }
+
+  int ToggleButton::getWidth(){
+     return this->xSize;
+  }
+
+  int ToggleButton::getHeight(){
+     return this->ySize;
+  }
+
   void ToggleButton::setParent(HWND parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
@@ -222,9 +245,7 @@
     this->xPos = x;
     this->yPos = y;
     SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    updateParent();
-    this->gotParentBitmap = false;
-    update();
+    fullUpdate();
   }
 
   void ToggleButton::disable(){

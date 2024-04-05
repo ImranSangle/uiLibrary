@@ -17,6 +17,7 @@ ui/src/checkbox.cpp
 ui/src/input.cpp
 ui/src/frame.cpp
 ui/src/element.cpp
+ui/src/linear_layout.cpp
 )
 
 target_include_directories(uiLibrary PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ui/include)

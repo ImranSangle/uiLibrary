@@ -47,6 +47,13 @@
     InvalidateRect(this->parent,&rt,TRUE);
   } 
 
+  void Button::fullUpdate(){
+    
+     updateParent();
+     this->gotParentBitmap = false;
+     update();
+  }
+
   void Button::paint(HWND hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
@@ -54,11 +61,13 @@
      HBITMAP memoryBitmap = CreateCompatibleBitmap(dc,this->xSize,this->ySize);
      HBITMAP oldBitmap = (HBITMAP) SelectObject(memoryDc,memoryBitmap);
 
-     Graphics Graphics(memoryDc);
+     Graphics graphics(memoryDc);
+
+     graphics.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 
      Bitmap bitmap(this->parentBitmap,NULL);
 
-     Graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
+     graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
   
      RectF rect = {0,0,(float)this->xSize,(float)this->ySize};
 
@@ -66,13 +75,13 @@
 
       Bitmap bitmap(this->backgroundImage.c_str());
 
-      Graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
+      graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
        
     }else{
 
       SolidBrush backbrush(this->backgroundColor);
       
-      Graphics.FillRectangle(&backbrush,rect);
+      graphics.FillRectangle(&backbrush,rect);
 
     }
 
@@ -86,25 +95,27 @@
      
      format.SetLineAlignment(StringAlignmentCenter);
 
-     Graphics.DrawString(this->text.c_str(),-1,&font,rect,&format,&brush);
+     graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
+
+     graphics.DrawString(this->text.c_str(),-1,&font,rect,&format,&brush);
 
     if(this->hover){
 
       SolidBrush backbrush(Color(75,255,255,255));
 
-      Graphics.FillRectangle(&backbrush,rect);
+      graphics.FillRectangle(&backbrush,rect);
     }
     
     if(this->pressed){
       SolidBrush backbrush(Color(100,255,255,255));
 
-      Graphics.FillRectangle(&backbrush,rect);
+      graphics.FillRectangle(&backbrush,rect);
     }
 
     if(this->disabled){
       SolidBrush backbrush(Color(128,0,0,0));
 
-      Graphics.FillRectangle(&backbrush,rect);
+      graphics.FillRectangle(&backbrush,rect);
     }
 
      BitBlt(dc,0,0,this->xSize,this->ySize,memoryDc,0,0,SRCCOPY);
@@ -190,6 +201,22 @@
      std::cout<<"button destroyed"<<std::endl;
   }
 
+  int Button::getX(){
+     return this->xPos;
+  }
+
+  int Button::getY(){
+     return this->yPos;
+  }
+
+  int Button::getWidth(){
+     return this->xSize;
+  }
+
+  int Button::getHeight(){
+     return this->ySize;
+  }
+
   void Button::setParent(HWND parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
@@ -248,9 +275,7 @@
     this->xPos = x;
     this->yPos = y;
     SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    updateParent();
-    this->gotParentBitmap = false;
-    update();
+    fullUpdate();
   }
 
   void Button::disable(){

@@ -58,6 +58,8 @@ private:
 
   void updateParent();
 
+  void fullUpdate();
+
   void paint(HWND hwnd); 
 
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
@@ -78,13 +80,21 @@ public:
 
   ~Checkbox();
 
+  int getX() override;
+
+  int getY() override;
+
+  int getWidth() override;
+
+  int getHeight() override;
+
   void setParent(HWND parent) override; 
 
   void setBackgroundOnColor(int r,int g,int b,int a);
 
   void setBackgroundOffColor(int r,int g,int b,int a);
 
-  void changePosition(int x,int y);
+  void changePosition(int x,int y) override;
 
   void disable();
 

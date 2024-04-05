@@ -31,7 +31,6 @@ class StaticElement : public Element{
 
 public:
   void(*onClick)(StaticElement*) = nullptr;
-  bool latchButton = false;
 private:
 
   void registerMouseCapure(HWND hwnd);
@@ -41,6 +40,8 @@ private:
   void update();
 
   void updateParent();
+
+  void fullUpdate();
 
   void paint(HWND hwnd); 
 
@@ -62,6 +63,14 @@ public:
 
   ~StaticElement();
 
+  int getX() override;
+
+  int getY() override;
+
+  int getWidth() override;
+
+  int getHeight() override;
+
   void setParent(HWND parent) override; 
 
   void setText(const std::wstring& name);
@@ -80,7 +89,7 @@ public:
 
   void setFont(const wchar_t* fontname);
 
-  void changePosition(int x,int y);
+  void changePosition(int x,int y) override;
 
   void disable();
 

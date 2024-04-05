@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <windows.h>
 #include <gdiplus.h>
 
@@ -8,51 +9,28 @@
 
 using namespace Gdiplus;
 
-class Button : public Element{
+class LinearLayout : public Element{
   private:
   int xPos;
   int yPos;
   int xSize;
   int ySize;
-  int textSize;
+  int yLength = 0;
+  int padding = 0;
   HWND parent;
   bool gotParentBitmap = false;
   HBITMAP parentBitmap = NULL;
   HWND handle;
   Color backgroundColor;
-  Color textColor;
   std::wstring backgroundImage; 
-  std::wstring text;
-  std::wstring font;
   bool hover = false;
   bool pressed = false;
   bool disabled = false;
+  std::vector<Element*> childs;
 
 public:
-  void(*onClick)(Button*) = nullptr;
-  bool latchButton = false;
+  void(*onClick)(LinearLayout*) = nullptr;
 private:
-
-  static void hoverAnimation(Button* object){
-
-     HDC dc = GetDC(object->handle);
-      
-     Graphics graphics(dc);
-
-     Rect rect = {0,0,object->xSize,object->ySize};
-
-     SolidBrush backbrush(Color(7,255,255,255));
-
-     for(int i =0;i<10;i++){
-      if(object->hover == false){
-        return;
-      }
-        graphics.FillRectangle(&backbrush,rect);
-        Sleep(1);
-      }
-
-     ReleaseDC(object->handle,dc);
-  }
 
   void registerMouseCapure(HWND hwnd);
 
@@ -69,10 +47,10 @@ private:
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
   
   static LRESULT CALLBACK callbackProcedure(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
-      Button* button = (Button*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
+      LinearLayout* linearLayout = (LinearLayout*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
 
-      if(button != nullptr){
-         return button->callbackProcedureImplementation(hwnd, msg, wp, lp);
+      if(linearLayout != nullptr){
+         return linearLayout->callbackProcedureImplementation(hwnd, msg, wp, lp);
       }else{
          return DefWindowProcW(hwnd, msg, wp, lp);
       }
@@ -80,9 +58,9 @@ private:
 
 public: 
 
-  Button(HWND hwnd,int x,int y,int cx,int cy);
+  LinearLayout(HWND hwnd,int x,int y,int cx,int cy);
 
-  ~Button();
+  ~LinearLayout();
 
   int getX() override;
 
@@ -92,15 +70,9 @@ public:
 
   int getHeight() override;
 
+  void add(Element* element);
+
   void setParent(HWND parent) override; 
-
-  void setText(const std::wstring& name);
-
-  std::wstring getText();
-
-  void setTextColor(int r,int g,int b);
-
-  void setTextSize(int size);
 
   void setBackgroundColor(int r,int g,int b,int a);
 
@@ -108,14 +80,11 @@ public:
 
   void setBackgroundImage(const std::wstring& path);
 
-  void setFont(const std::wstring& fontname);
+  void setPadding(int paddingAmount);
 
   void changePosition(int x,int y) override;
 
   void disable();
 
   void enable();
-
-  bool buttonState();
-
 };

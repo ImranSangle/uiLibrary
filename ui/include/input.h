@@ -68,6 +68,8 @@ private:
 
   void updateParent();
 
+  void fullUpdate();
+
   void handleKeyboardEvents(HWND hwnd,WPARAM wp);
 
   void paint(HWND hwnd); 
@@ -90,7 +92,15 @@ public:
 
   ~InputBox();
 
-  void setParent(HWND parent);
+  int getX() override;
+
+  int getY() override;
+
+  int getWidth() override;
+
+  int getHeight() override;
+
+  void setParent(HWND parent) override;
 
   void setText(const std::wstring& name);
   
@@ -110,7 +120,7 @@ public:
 
   void setFont(const std::wstring& fontname);
 
-  void changePosition(int x,int y);
+  void changePosition(int x,int y) override;
 
   void disable();
 

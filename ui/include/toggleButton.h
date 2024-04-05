@@ -65,6 +65,8 @@ private:
 
   void updateParent();
 
+  void fullUpdate();
+
   void DrawCircle(Graphics&,SolidBrush&,const Point&,float);
 
   void paint(HWND hwnd); 
@@ -87,13 +89,21 @@ public:
 
   ~ToggleButton();
 
+  int getX() override;
+
+  int getY() override;
+
+  int getWidth() override;
+
+  int getHeight() override;
+
   void setParent(HWND parent) override; 
 
   void setBackgroundOnColor(int r,int g,int b);
 
   void setBackgroundOffColor(int r,int g,int b);
 
-  void changePosition(int x,int y);
+  void changePosition(int x,int y) override;
 
   void disable();
 

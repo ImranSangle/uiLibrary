@@ -1,8 +1,10 @@
 
-#include <static_element.h>
+#include <linear_layout.h>
 #include <iostream>
+#include <windef.h>
+#include <wingdi.h>
 
-  void StaticElement::registerMouseCapure(HWND hwnd){
+  void LinearLayout::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
     tme.cbSize = sizeof(TRACKMOUSEEVENT);
     tme.dwFlags = TME_LEAVE;
@@ -11,7 +13,7 @@
 
   }
 
-  void StaticElement::getParentBitmap(){
+  void LinearLayout::getParentBitmap(){
      
      if(this->parentBitmap != NULL){
         DeleteObject(this->parentBitmap);
@@ -30,11 +32,11 @@
      ReleaseDC(this->parent,parentDc);
   }
 
-  void StaticElement::update(){
+  void LinearLayout::update(){
      InvalidateRect(this->handle,NULL,TRUE);
   }
 
-  void StaticElement::updateParent(){
+  void LinearLayout::updateParent(){
 
     RECT rt;
     rt.top = this->yPos;
@@ -44,14 +46,14 @@
     InvalidateRect(this->parent,&rt,TRUE);
   } 
 
-  void StaticElement::fullUpdate(){
+  void LinearLayout::fullUpdate(){
     
      updateParent();
      this->gotParentBitmap = false;
      update();
   }
 
-  void StaticElement::paint(HWND hwnd){      
+  void LinearLayout::paint(HWND hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
      HDC memoryDc = CreateCompatibleDC(dc);
@@ -82,41 +84,12 @@
 
     }
 
-     Font font(this->font.c_str(),this->textSize);
- 
-     SolidBrush brush(this->textColor);
-
-     StringFormat format;
-     
-     format.SetLineAlignment(StringAlignmentCenter);
-
-     graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
-  
-     graphics.DrawString(this->text.c_str(),-1,&font,rect,&format,&brush);
-
-
     if(this->disabled){
       SolidBrush backbrush(Color(128,0,0,0));
 
       graphics.FillRectangle(&backbrush,rect);
     }
-     
-     if(this->autoResize){
-       RectF mesureRect;
-       RectF paddingRect;
-       graphics.MeasureString(this->text.c_str(),-1,&font,PointF(0,0),&mesureRect);
-       graphics.MeasureString(L"A",-1,&font,PointF(0,0),&paddingRect);
-       this->xSize = mesureRect.Width+(paddingRect.Width/10);
-       this->ySize = mesureRect.Height;
-       SetWindowPos(this->handle,NULL,this->xPos,this->yPos,this->xSize,this->ySize,SWP_NOZORDER);
-       if(this->backgroundColor.GetA() < 255){
-         updateParent();
-         this->gotParentBitmap = false;
-       }
-       update();
-       this->autoResize = false;
-     }
-  
+
      BitBlt(dc,0,0,this->xSize,this->ySize,memoryDc,0,0,SRCCOPY);
 
      SelectObject(memoryDc,oldBitmap);
@@ -125,24 +98,37 @@
      EndPaint(hwnd,&ps);
   }
 
-  LRESULT CALLBACK StaticElement::callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
+  LRESULT CALLBACK LinearLayout::callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
       switch(msg){
       case WM_SETFOCUS:
         SendMessageW((HWND)wp,WM_USER,true,0);
+      break;
+      case WM_MOUSEWHEEL:
+         if((SHORT)HIWORD(wp) > 0){
+           for(int i=0;i<this->childs.size();i++){
+              this->childs[i]->changePosition(this->childs[i]->getX(),this->childs[i]->getY()+20);
+           }
+         }else{
+           for(int i=0;i<this->childs.size();i++){
+              this->childs[i]->changePosition(this->childs[i]->getX(),this->childs[i]->getY()-20);
+           }
+         }
       break;
       case WM_LBUTTONDBLCLK:
       case WM_LBUTTONDOWN:
         if(this->pressed == false && this->disabled == false){
           this->pressed = true;
           SetFocus(hwnd);
+          update();
+         }
+      break;
+      case WM_LBUTTONUP:
+        if(this->pressed == true && this->disabled == false){
+          this->pressed = false;
+          update();
           if(this->onClick != nullptr){
             onClick(this);
           }
-        }
-      break;
-      case WM_LBUTTONUP:
-        if(this->pressed == true  && this->disabled == false){
-          this->pressed = false;
         }
       break;
       case WM_MOUSEMOVE:
@@ -154,6 +140,7 @@
       case WM_MOUSELEAVE:
         if(this->hover == true && this->disabled == false){
           this->hover = false;
+          update();
         }
       break;
       case WM_PAINT:
@@ -172,94 +159,77 @@
   }
   
 
-  StaticElement::StaticElement(HWND hwnd,int x,int y,int cx,int cy){
+  LinearLayout::LinearLayout(HWND hwnd,int x,int y,int cx,int cy){
      this->xPos = x;
      this->yPos = y;
      this->xSize = cx;
      this->ySize = cy;
      this->parent = hwnd;
      this->backgroundColor.SetFromCOLORREF(RGB(100,100,100));
-     this->textColor.SetFromCOLORREF(RGB(255,255,255));
-     this->font = L"Roboto";
-     this->textSize = 12;
   }
 
-  StaticElement::~StaticElement(){
+  LinearLayout::~LinearLayout(){
      DestroyWindow(this->parent);
-     std::cout<<"StaticElement destroyed"<<std::endl;
+     std::cout<<"LinearLayout destroyed"<<std::endl;
   }
 
-  int StaticElement::getX(){
+  int LinearLayout::getX(){
      return this->xPos;
   }
 
-  int StaticElement::getY(){
+  int LinearLayout::getY(){
      return this->yPos;
   }
 
-  int StaticElement::getWidth(){
+  int LinearLayout::getWidth(){
      return this->xSize;
   }
 
-  int StaticElement::getHeight(){
+  int LinearLayout::getHeight(){
      return this->ySize;
   }
 
-  void StaticElement::setParent(HWND parent){
+  void LinearLayout::setParent(HWND parent){
       this->parent = parent;
-      this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
+      this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,NULL,NULL,NULL);
 
       SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
-      SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)StaticElement::callbackProcedure);
+      SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)LinearLayout::callbackProcedure);
 
-      std::cout<<"StaticElement created"<<std::endl;
+      std::cout<<"LinearLayout created"<<std::endl;
   }
 
-  void StaticElement::setText(const std::wstring& name){
-    this->text = name; 
-    this->autoResize = true; 
-    update();
+  void LinearLayout::add(Element* element){
+      element->setParent(this->handle);
+
+      this->childs.push_back(element);
+      element->changePosition(element->getX(),this->yLength);
+      this->yLength+= element->getHeight()+this->padding;
   }
 
-  std::wstring StaticElement::getText(){
-     return this->text;
-  }
-
-  void StaticElement::setTextColor(int r,int g,int b){
-     
-     this->textColor.SetFromCOLORREF(RGB(r,g,b));
-    update();
-  }
-
-  void StaticElement::setTextSize(int size){
-    this->textSize = size;
-    update();
-  }
-
-  void StaticElement::setBackgroundColor(int r,int g,int b,int a){
+  void LinearLayout::setBackgroundColor(int r,int g,int b,int a){
      
     this->backgroundColor.SetValue(Color::MakeARGB(a,r, g, b));
     update();
   }
 
-  void StaticElement::setBackgroundColor(int r,int g,int b){
+  void LinearLayout::setBackgroundColor(int r,int g,int b){
     
     this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
     update();
 
   }
 
-  void StaticElement::setBackgroundImage(const wchar_t* path){
+  void LinearLayout::setBackgroundImage(const std::wstring& path){
      this->backgroundImage = path;
     update();
   }
 
-  void StaticElement::setFont(const wchar_t* fontname){
-    this->font = fontname;
-    update();
+  void LinearLayout::setPadding(int paddingAmount){
+    this->padding = paddingAmount;
   }
 
-  void StaticElement::changePosition(int x,int y){
+  void LinearLayout::changePosition(int x,int y){
     
     this->xPos = x;
     this->yPos = y;
@@ -267,12 +237,12 @@
     fullUpdate();
   }
 
-  void StaticElement::disable(){
+  void LinearLayout::disable(){
     this->disabled = true;
     update();
   }
 
-  void StaticElement::enable(){
+  void LinearLayout::enable(){
     this->disabled = false;
     update();
   }

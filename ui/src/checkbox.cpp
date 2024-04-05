@@ -45,6 +45,13 @@
     InvalidateRect(this->parent,&rt,TRUE);
   } 
 
+  void Checkbox::fullUpdate(){
+    
+     updateParent();
+     this->gotParentBitmap = false;
+     update();
+  }
+
   void Checkbox::paint(HWND hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
@@ -176,6 +183,22 @@
      std::cout<<"Checkbox destroyed"<<std::endl;
   }
 
+  int Checkbox::getX(){
+     return this->xPos;
+  }
+
+  int Checkbox::getY(){
+     return this->yPos;
+  }
+
+  int Checkbox::getWidth(){
+     return this->xSize;
+  }
+
+  int Checkbox::getHeight(){
+     return this->ySize;
+  }
+
   void Checkbox::setParent(HWND parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
@@ -204,9 +227,7 @@
     this->xPos = x;
     this->yPos = y;
     SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    updateParent();
-    this->gotParentBitmap = false;
-    update();
+    fullUpdate();
   }
 
   void Checkbox::disable(){
