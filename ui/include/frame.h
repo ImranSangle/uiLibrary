@@ -45,7 +45,7 @@ private:
 
 public:
 
-  Frame(int x,int y,int cx,int cy,bool titlebar);
+  Frame(const std::wstring& name,int x,int y,int cx,int cy,bool titlebar);
 
   ~Frame();
 
@@ -59,8 +59,8 @@ public:
 
   HWND getHandle();
 
-  int width(); 
+  int getWidth(); 
   
-  int height();
+  int getHeight();
 
 };

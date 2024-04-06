@@ -1,10 +1,9 @@
-
-#include <linear_layout.h>
+#include <group.h>
 #include <iostream>
 #include <windef.h>
 #include <wingdi.h>
 
-  void LinearLayout::registerMouseCapure(HWND hwnd){
+  void Group::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
     tme.cbSize = sizeof(TRACKMOUSEEVENT);
     tme.dwFlags = TME_LEAVE;
@@ -13,7 +12,7 @@
 
   }
 
-  void LinearLayout::getParentBitmap(){
+  void Group::getParentBitmap(){
      
      if(this->parentBitmap != NULL){
         DeleteObject(this->parentBitmap);
@@ -32,11 +31,11 @@
      ReleaseDC(this->parent,parentDc);
   }
 
-  void LinearLayout::update(){
+  void Group::update(){
      InvalidateRect(this->handle,NULL,TRUE);
   }
 
-  void LinearLayout::updateParent(){
+  void Group::updateParent(){
 
     RECT rt;
     rt.top = this->yPos;
@@ -46,28 +45,14 @@
     InvalidateRect(this->parent,&rt,TRUE);
   } 
 
-  void LinearLayout::fullUpdate(){
+  void Group::fullUpdate(){
     
      updateParent();
      this->gotParentBitmap = false;
      update();
   }
 
-  void LinearLayout::updateScrollbar(){
-     
-     HDC dc = GetDC(this->handle);
-
-     Graphics graphics(dc);
-
-     SolidBrush scrollbarBrush(Color(250,250,250));
-     SolidBrush backgroundBrush(Color(0,0,0));
-     graphics.FillRectangle(&backgroundBrush,this->xSize-6,0,6,this->ySize);
-     graphics.FillRectangle(&scrollbarBrush,this->xSize-5,(int)this->scrollbarYPosition,4,(int)(this->ySize/(this->yLength/this->ySize)));
-
-     ReleaseDC(this->handle,dc);
-  }
-
-  void LinearLayout::paint(HWND hwnd){      
+  void Group::paint(HWND hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
      HDC memoryDc = CreateCompatibleDC(dc);
@@ -112,29 +97,10 @@
      EndPaint(hwnd,&ps);
   }
 
-  LRESULT CALLBACK LinearLayout::callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
+  LRESULT CALLBACK Group::callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
       switch(msg){
       case WM_SETFOCUS:
         SendMessageW((HWND)wp,WM_USER,true,0);
-      break;
-      case WM_MOUSEWHEEL:
-         if((SHORT)HIWORD(wp) > 0){
-           if(this->scrollbarYPosition > 0){
-             for(int i=0;i<this->childs.size();i++){
-                this->childs[i]->changePosition(this->childs[i]->getX(),this->childs[i]->getY()+20);
-             }
-             this->scrollbarYPosition-= this->ySize/(this->yLength/20);
-             updateScrollbar();
-           }
-         }else{
-           if(this->scrollbarYPosition+this->ySize/(this->yLength/this->ySize) <= this->ySize){
-             for(int i=0;i<this->childs.size();i++){
-                this->childs[i]->changePosition(this->childs[i]->getX(),this->childs[i]->getY()-20);
-             }
-             this->scrollbarYPosition+= this->ySize/(this->yLength/20); 
-             updateScrollbar();
-           }
-         }
       break;
       case WM_LBUTTONDBLCLK:
       case WM_LBUTTONDOWN:
@@ -178,7 +144,7 @@
   }
   
 
-  LinearLayout::LinearLayout(HWND hwnd,int x,int y,int cx,int cy){
+  Group::Group(HWND hwnd,int x,int y,int cx,int cy){
      this->xPos = x;
      this->yPos = y;
      this->xSize = cx;
@@ -187,81 +153,82 @@
      this->backgroundColor.SetFromCOLORREF(RGB(30,30,30));
   }
 
-  LinearLayout::~LinearLayout(){
+  Group::~Group(){
      DestroyWindow(this->parent);
-     std::cout<<"LinearLayout destroyed"<<std::endl;
+     std::cout<<"Group destroyed"<<std::endl;
   }
 
-  int LinearLayout::getX(){
+  int Group::getX(){
      return this->xPos;
   }
 
-  int LinearLayout::getY(){
+  int Group::getY(){
      return this->yPos;
   }
 
-  int LinearLayout::getWidth(){
+  int Group::getWidth(){
      return this->xSize;
   }
 
-  int LinearLayout::getHeight(){
+  int Group::getHeight(){
      return this->ySize;
   }
 
-  void LinearLayout::setParent(HWND parent){
+  void Group::setParent(HWND parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,NULL,NULL,NULL);
 
       SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
-      SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)LinearLayout::callbackProcedure);
+      SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)Group::callbackProcedure);
 
-      std::cout<<"LinearLayout created"<<std::endl;
+      std::cout<<"Group created"<<std::endl;
   }
 
-  void LinearLayout::add(Element* element){
+  void Group::add(Element* element){
       element->setParent(this->handle);
 
       this->childs.push_back(element);
-      element->changePosition(element->getX(),this->yLength);
-      this->yLength+= element->getHeight()+this->padding;
   }
 
-  void LinearLayout::setBackgroundColor(int r,int g,int b,int a){
+  void Group::setBackgroundColor(int r,int g,int b,int a){
      
     this->backgroundColor.SetValue(Color::MakeARGB(a,r, g, b));
     update();
   }
 
-  void LinearLayout::setBackgroundColor(int r,int g,int b){
+  void Group::setBackgroundColor(int r,int g,int b){
     
     this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
     update();
 
   }
 
-  void LinearLayout::setBackgroundImage(const std::wstring& path){
+  void Group::setBackgroundImage(const std::wstring& path){
      this->backgroundImage = path;
     update();
   }
 
-  void LinearLayout::setPadding(int paddingAmount){
+  void Group::setPadding(int paddingAmount){
     this->padding = paddingAmount;
   }
 
-  void LinearLayout::changePosition(int x,int y){
+  void Group::changePosition(int x,int y){
     
     this->xPos = x;
     this->yPos = y;
     SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
     fullUpdate();
+    for(int i =0;i<this->childs.size();i++){
+      this->childs[i]->changePosition(this->childs[i]->getX(),this->childs[i]->getY());
+    }
   }
 
-  void LinearLayout::disable(){
+  void Group::disable(){
     this->disabled = true;
     update();
   }
 
-  void LinearLayout::enable(){
+  void Group::enable(){
     this->disabled = false;
     update();
   }

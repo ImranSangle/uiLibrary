@@ -9,15 +9,13 @@
 
 using namespace Gdiplus;
 
-class LinearLayout : public Element{
+class Group : public Element{
   private:
   int xPos;
   int yPos;
   int xSize;
   int ySize;
-  float yLength = 0;
   float padding = 0;
-  float scrollbarYPosition = 0;
   HWND parent;
   bool gotParentBitmap = false;
   HBITMAP parentBitmap = NULL;
@@ -30,7 +28,7 @@ class LinearLayout : public Element{
   std::vector<Element*> childs;
 
 public:
-  void(*onClick)(LinearLayout*) = nullptr;
+  void(*onClick)(Group*) = nullptr;
 private:
 
   void registerMouseCapure(HWND hwnd);
@@ -43,17 +41,15 @@ private:
 
   void fullUpdate();
 
-  void updateScrollbar();
-
   void paint(HWND hwnd); 
 
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
   
   static LRESULT CALLBACK callbackProcedure(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
-      LinearLayout* linearLayout = (LinearLayout*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
+      Group* group = (Group*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
 
-      if(linearLayout != nullptr){
-         return linearLayout->callbackProcedureImplementation(hwnd, msg, wp, lp);
+      if(group != nullptr){
+         return group->callbackProcedureImplementation(hwnd, msg, wp, lp);
       }else{
          return DefWindowProcW(hwnd, msg, wp, lp);
       }
@@ -61,9 +57,9 @@ private:
 
 public: 
 
-  LinearLayout(HWND hwnd,int x,int y,int cx,int cy);
+  Group(HWND hwnd,int x,int y,int cx,int cy);
 
-  ~LinearLayout();
+  ~Group();
 
   int getX() override;
 

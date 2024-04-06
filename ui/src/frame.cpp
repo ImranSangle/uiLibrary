@@ -80,7 +80,7 @@
     return (LRESULT) nullptr;
   }
 
-  Frame::Frame(int x,int y,int cx,int cy,bool titlebar){
+  Frame::Frame(const std::wstring& name,int x,int y,int cx,int cy,bool titlebar){
     this->xPos = x;
     this->yPos = y;
     this->xSize = cx;
@@ -94,7 +94,7 @@
     wc.hInstance = GetModuleHandle(NULL);
     wc.hbrBackground = (HBRUSH) GetStockObject(WHITE_BRUSH);
     wc.hCursor = LoadCursor(NULL,IDC_ARROW);
-    wc.lpszClassName = L"mainWindowClass";
+    wc.lpszClassName = name.c_str();
     wc.lpfnWndProc = frameProcedure;
 
     if(!RegisterClassW(&wc)){
@@ -110,7 +110,7 @@
       windowStyles = WS_CLIPCHILDREN | WS_BORDER | WS_VISIBLE | WS_POPUP ;
     }
 
-    this->handle = CreateWindowExW(0,L"mainWindowClass",L"mainWindow",windowStyles,this->xPos,this->yPos,this->xSize,this->ySize,NULL,NULL,NULL,NULL);
+    this->handle = CreateWindowExW(0,name.c_str(),L"mainWindow",windowStyles,this->xPos,this->yPos,this->xSize,this->ySize,NULL,NULL,NULL,NULL);
 
     SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
   }
@@ -149,10 +149,10 @@
      return this->handle;
   }
 
-  int Frame::width(){
+  int Frame::getWidth(){
      return this->xSize;
   }
 
-  int Frame::height(){
+  int Frame::getHeight(){
      return this->ySize;
   }
