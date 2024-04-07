@@ -18,6 +18,8 @@ class LinearLayout : public Element{
   float yLength = 0;
   float padding = 0;
   float scrollbarYPosition = 0;
+  int scrollVelocity = 0;
+  WPARAM scrollDirection;
   HWND parent;
   bool gotParentBitmap = false;
   HBITMAP parentBitmap = NULL;
@@ -45,6 +47,8 @@ private:
 
   void updateScrollbar();
 
+  void scroll(WPARAM wp,int velocity);
+
   void paint(HWND hwnd); 
 
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
@@ -57,6 +61,15 @@ private:
       }else{
          return DefWindowProcW(hwnd, msg, wp, lp);
       }
+  }
+
+ static void scrollWorker(LinearLayout* layout){
+    
+    while(layout->scrollVelocity > 0){
+      layout->scroll(layout->scrollDirection,layout->scrollVelocity);
+      layout->scrollVelocity--;
+    }
+      layout->update();
   }
 
 public: 

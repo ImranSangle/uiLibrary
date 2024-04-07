@@ -61,8 +61,6 @@
 
      Graphics graphics(memoryDc);
 
-     graphics.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
-
      Bitmap bitmap(this->parentBitmap,NULL);
 
      graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
@@ -217,9 +215,11 @@
     this->xPos = x;
     this->yPos = y;
     SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    fullUpdate();
-    for(int i =0;i<this->childs.size();i++){
-      this->childs[i]->changePosition(this->childs[i]->getX(),this->childs[i]->getY());
+    if(this->backgroundColor.GetA() < 255){
+      fullUpdate();
+      for(int i =0;i<this->childs.size();i++){
+        this->childs[i]->changePosition(this->childs[i]->getX(),this->childs[i]->getY());
+      }
     }
   }
 

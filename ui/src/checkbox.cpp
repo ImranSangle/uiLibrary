@@ -65,7 +65,6 @@
 
      graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
 
-     graphics.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 
      Rect rect = {0,0,this->xSize,this->ySize};
 
@@ -89,6 +88,7 @@
     }
 
     if(this->switchOn){
+      graphics.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
       Pen tickPen(Color(255,255,255),1.5);
       SolidBrush tempbrush(Color(128,0,0,0));
       int innerWidth = this->xSize/6;
@@ -227,7 +227,9 @@
     this->xPos = x;
     this->yPos = y;
     SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    fullUpdate();
+    if(this->backgroundOffColor.GetA() < 255 || this->backgroundOnColor.GetA() < 255){
+     fullUpdate();
+    }
   }
 
   void Checkbox::disable(){

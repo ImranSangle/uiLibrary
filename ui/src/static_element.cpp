@@ -60,8 +60,6 @@
 
      Graphics graphics(memoryDc);
 
-     graphics.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
-
      Bitmap bitmap(this->parentBitmap,NULL);
 
      graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);
@@ -264,7 +262,9 @@
     this->xPos = x;
     this->yPos = y;
     SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    fullUpdate();
+    if(this->backgroundColor.GetA() < 255){
+      fullUpdate();
+    }
   }
 
   void StaticElement::disable(){

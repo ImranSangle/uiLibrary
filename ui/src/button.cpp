@@ -63,8 +63,6 @@
 
      Graphics graphics(memoryDc);
 
-     graphics.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
-
      Bitmap bitmap(this->parentBitmap,NULL);
 
      graphics.DrawImage(&bitmap,0,0,this->xSize,this->ySize);

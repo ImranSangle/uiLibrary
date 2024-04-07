@@ -3,6 +3,7 @@
 #include <iostream>
 #include <windef.h>
 #include <wingdi.h>
+#include <thread>
 
   void LinearLayout::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
@@ -67,6 +68,27 @@
      ReleaseDC(this->handle,dc);
   }
 
+  void LinearLayout::scroll(WPARAM wp,int velocity){
+
+         if((SHORT)HIWORD(wp) > 0){
+           if(this->scrollbarYPosition > 0){
+             for(int i=0;i<this->childs.size();i++){
+                this->childs[i]->changePosition(this->childs[i]->getX(),this->childs[i]->getY()+velocity);
+             }
+             this->scrollbarYPosition-= this->ySize/(this->yLength/velocity);
+             updateScrollbar();
+           }
+         }else{
+           if(this->scrollbarYPosition+this->ySize/(this->yLength/this->ySize) <= this->ySize){
+             for(int i=0;i<this->childs.size();i++){
+                this->childs[i]->changePosition(this->childs[i]->getX(),this->childs[i]->getY()-velocity);
+             }
+             this->scrollbarYPosition+= this->ySize/(this->yLength/velocity); 
+             updateScrollbar();
+           }
+         }
+  }
+
   void LinearLayout::paint(HWND hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
@@ -118,23 +140,16 @@
         SendMessageW((HWND)wp,WM_USER,true,0);
       break;
       case WM_MOUSEWHEEL:
-         if((SHORT)HIWORD(wp) > 0){
-           if(this->scrollbarYPosition > 0){
-             for(int i=0;i<this->childs.size();i++){
-                this->childs[i]->changePosition(this->childs[i]->getX(),this->childs[i]->getY()+20);
-             }
-             this->scrollbarYPosition-= this->ySize/(this->yLength/20);
-             updateScrollbar();
-           }
-         }else{
-           if(this->scrollbarYPosition+this->ySize/(this->yLength/this->ySize) <= this->ySize){
-             for(int i=0;i<this->childs.size();i++){
-                this->childs[i]->changePosition(this->childs[i]->getX(),this->childs[i]->getY()-20);
-             }
-             this->scrollbarYPosition+= this->ySize/(this->yLength/20); 
-             updateScrollbar();
-           }
+         if(this->scrollVelocity == 0){
+           std::thread worker(LinearLayout::scrollWorker,this);
+           worker.detach();
          }
+         if(wp != this->scrollDirection){
+           this->scrollVelocity = 4;
+         }else{
+           this->scrollVelocity+=4;
+         }
+           this->scrollDirection = wp;
       break;
       case WM_LBUTTONDBLCLK:
       case WM_LBUTTONDOWN:
@@ -253,7 +268,9 @@
     this->xPos = x;
     this->yPos = y;
     SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    fullUpdate();
+    if(this->backgroundColor.GetA() < 255){
+      fullUpdate();
+    }
   }
 
   void LinearLayout::disable(){
