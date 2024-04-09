@@ -126,6 +126,14 @@
           this->hover = false;
         }
       break;
+      case WM_SIZE:
+          if(this->onSize != nullptr){
+             this->onSize(this);
+          }
+          for(int i =0;i<this->childs.size();i++){
+             this->childs[i]->update();
+          }
+      break;
       case WM_PAINT:
        if(this->gotParentBitmap == false){
          getParentBitmap();
@@ -170,6 +178,10 @@
 
   int Group::getHeight(){
      return this->ySize;
+  }
+
+  std::vector<Element*> Group::getChilds(){
+     return this->childs; 
   }
 
   void Group::setParent(HWND parent){
@@ -218,9 +230,24 @@
     if(this->backgroundColor.GetA() < 255){
       fullUpdate();
       for(int i =0;i<this->childs.size();i++){
-        this->childs[i]->changePosition(this->childs[i]->getX(),this->childs[i]->getY());
+         this->childs[i]->fullUpdate();
       }
     }
+  }
+
+  void Group::changeSize(int width,int height){
+    this->xSize = width;
+    this->ySize = height;
+    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
+    fullUpdate();
+  }
+
+  void Group::show(){
+    ShowWindow(this->handle,SW_SHOW);
+  }
+
+  void Group::hide(){
+    ShowWindow(this->handle,SW_HIDE);
   }
 
   void Group::disable(){

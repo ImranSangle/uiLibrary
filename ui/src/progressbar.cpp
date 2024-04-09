@@ -1,8 +1,11 @@
 
-#include <static_element.h>
+#include <progressbar.h>
+#include <thread>
 #include <iostream>
+#include <windef.h>
+#include <wingdi.h>
 
-  void StaticElement::registerMouseCapure(HWND hwnd){
+  void Progressbar::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
     tme.cbSize = sizeof(TRACKMOUSEEVENT);
     tme.dwFlags = TME_LEAVE;
@@ -11,7 +14,7 @@
 
   }
 
-  void StaticElement::getParentBitmap(){
+  void Progressbar::getParentBitmap(){
      
      if(this->parentBitmap != NULL){
         DeleteObject(this->parentBitmap);
@@ -30,11 +33,11 @@
      ReleaseDC(this->parent,parentDc);
   }
 
-  void StaticElement::update(){
+  void Progressbar::update(){
      InvalidateRect(this->handle,NULL,TRUE);
   }
 
-  void StaticElement::updateParent(){
+  void Progressbar::updateParent(){
 
     RECT rt;
     rt.top = this->yPos;
@@ -44,14 +47,21 @@
     InvalidateRect(this->parent,&rt,TRUE);
   } 
 
-  void StaticElement::fullUpdate(){
+  void Progressbar::fullUpdate(){
     
      updateParent();
      this->gotParentBitmap = false;
      update();
   }
 
-  void StaticElement::paint(HWND hwnd){      
+  float Progressbar::remap(const float& value,const float& a,const float& b,const float& c,const float& d){
+      
+      float t = (value-a)/(b-a); 
+
+      return (c*(1.0f-t))+(d*t);
+  }
+
+  void Progressbar::paint(HWND hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
      HDC memoryDc = CreateCompatibleDC(dc);
@@ -79,42 +89,32 @@
       graphics.FillRectangle(&backbrush,rect);
 
     }
+      RectF progressRect;
 
-     Font font(this->font.c_str(),this->textSize);
- 
-     SolidBrush brush(this->textColor);
+      if(this->vertical){
+        if(this->reversed){
+          progressRect = {0,0,rect.Width,remap(this->progress,this->min,this->max,0,rect.Height)};
+        }else{
+          progressRect = {0,remap(this->progress,this->min,this->max,rect.Height,0),rect.Width,rect.Height};
+        }
+      }else{
+        if(this->reversed){
+          progressRect = {remap(this->progress,this->min,this->max,this->xSize,0),0,rect.Width,rect.Height};
+        }else{
+          progressRect = {0,0,remap(this->progress,this->min,this->max,0,this->xSize),rect.Height};
+        }
+      }
 
-     StringFormat format;
-     
-     format.SetLineAlignment(StringAlignmentCenter);
+      SolidBrush progressBrush(this->barColor);
 
-     graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
-  
-     graphics.DrawString(this->text.c_str(),-1,&font,rect,&format,&brush);
-
-
+      graphics.FillRectangle(&progressBrush,progressRect);
+    
     if(this->disabled){
       SolidBrush backbrush(Color(128,0,0,0));
 
       graphics.FillRectangle(&backbrush,rect);
     }
-     
-     if(this->autoResize){
-       RectF mesureRect;
-       RectF paddingRect;
-       graphics.MeasureString(this->text.c_str(),-1,&font,PointF(0,0),&mesureRect);
-       graphics.MeasureString(L"A",-1,&font,PointF(0,0),&paddingRect);
-       this->xSize = mesureRect.Width+(paddingRect.Width/10);
-       this->ySize = mesureRect.Height;
-       SetWindowPos(this->handle,NULL,this->xPos,this->yPos,this->xSize,this->ySize,SWP_NOZORDER);
-       if(this->backgroundColor.GetA() < 255){
-         updateParent();
-         this->gotParentBitmap = false;
-       }
-       update();
-       this->autoResize = false;
-     }
-  
+
      BitBlt(dc,0,0,this->xSize,this->ySize,memoryDc,0,0,SRCCOPY);
 
      SelectObject(memoryDc,oldBitmap);
@@ -123,7 +123,7 @@
      EndPaint(hwnd,&ps);
   }
 
-  LRESULT CALLBACK StaticElement::callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
+  LRESULT CALLBACK Progressbar::callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
       switch(msg){
       case WM_SETFOCUS:
         SendMessageW((HWND)wp,WM_USER,true,0);
@@ -133,14 +133,14 @@
         if(this->pressed == false && this->disabled == false){
           this->pressed = true;
           SetFocus(hwnd);
+          }
+      break;
+      case WM_LBUTTONUP:
+        if(this->pressed == true && this->disabled == false){
+          this->pressed = false;
           if(this->onClick != nullptr){
             onClick(this);
           }
-        }
-      break;
-      case WM_LBUTTONUP:
-        if(this->pressed == true  && this->disabled == false){
-          this->pressed = false;
         }
       break;
       case WM_MOUSEMOVE:
@@ -170,124 +170,136 @@
   }
   
 
-  StaticElement::StaticElement(HWND hwnd,int x,int y,int cx,int cy){
+  Progressbar::Progressbar(HWND hwnd,int x,int y,int cx,int cy){
      this->xPos = x;
      this->yPos = y;
      this->xSize = cx;
      this->ySize = cy;
      this->parent = hwnd;
      this->backgroundColor.SetFromCOLORREF(RGB(100,100,100));
-     this->textColor.SetFromCOLORREF(RGB(255,255,255));
-     this->font = L"Roboto";
-     this->textSize = 12;
   }
 
-  StaticElement::~StaticElement(){
+  Progressbar::~Progressbar(){
      DestroyWindow(this->parent);
-     std::cout<<"StaticElement destroyed"<<std::endl;
+     std::cout<<"Progressbar destroyed"<<std::endl;
   }
 
-  int StaticElement::getX(){
+  int Progressbar::getX(){
      return this->xPos;
   }
 
-  int StaticElement::getY(){
+  int Progressbar::getY(){
      return this->yPos;
   }
 
-  int StaticElement::getWidth(){
+  int Progressbar::getWidth(){
      return this->xSize;
   }
 
-  int StaticElement::getHeight(){
+  int Progressbar::getHeight(){
      return this->ySize;
   }
 
-  void StaticElement::setParent(HWND parent){
+  float Progressbar::getMin(){
+     return this->min;
+  }
+
+  float Progressbar::getMax(){
+     return this->max;
+  }
+
+  float Progressbar::getProgress(){
+     return this->progress;
+  }
+
+  void Progressbar::setParent(HWND parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
 
       SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
-      SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)StaticElement::callbackProcedure);
+      SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)Progressbar::callbackProcedure);
 
-      std::cout<<"StaticElement created"<<std::endl;
+      std::cout<<"button created"<<std::endl;
   }
 
-  void StaticElement::setText(const std::wstring& name){
-    this->text = name; 
-    this->autoResize = true; 
-    update();
-  }
-
-  std::wstring StaticElement::getText(){
-     return this->text;
-  }
-
-  void StaticElement::setTextColor(int r,int g,int b){
-     
-     this->textColor.SetFromCOLORREF(RGB(r,g,b));
-    update();
-  }
-
-  void StaticElement::setTextSize(int size){
-    this->textSize = size;
-    update();
-  }
-
-  void StaticElement::setBackgroundColor(int r,int g,int b,int a){
+  void Progressbar::setBackgroundColor(int r,int g,int b,int a){
      
     this->backgroundColor.SetValue(Color::MakeARGB(a,r, g, b));
     update();
   }
 
-  void StaticElement::setBackgroundColor(int r,int g,int b){
+  void Progressbar::setBackgroundColor(int r,int g,int b){
     
     this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
     update();
 
   }
 
-  void StaticElement::setBackgroundImage(const wchar_t* path){
+  void Progressbar::setBackgroundImage(const std::wstring& path){
      this->backgroundImage = path;
     update();
   }
 
-  void StaticElement::setFont(const wchar_t* fontname){
-    this->font = fontname;
-    update();
+  void Progressbar::setBarColor(int r,int g,int b,int a){
+     this->barColor.SetValue(Color::MakeARGB(r, g, b, a));
+     update();
   }
 
-  void StaticElement::changePosition(int x,int y){
+  void Progressbar::setBarColor(int r,int g,int b){
+     this->barColor.SetFromCOLORREF(RGB(r,g,b));
+     update();
+  }
+
+  void Progressbar::setMin(const float& value){
+     this->min = value;
+  }
+
+  void Progressbar::setMax(const float& value){
+     this->max = value;
+  }
+
+  void Progressbar::setProgress(const float& value){
+     if(value > this->max){
+        this->progress = this->max;
+        update();
+     }else if(value < this->min){
+        this->progress = this->min;
+        update();
+     }else{
+        this->progress = value;
+        update();
+     }
+  }
+
+  void Progressbar::changePosition(int x,int y){
     
     this->xPos = x;
     this->yPos = y;
     SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    if(this->backgroundColor.GetA() < 255){
-      fullUpdate();
-    }
+    fullUpdate();
   }
 
-  void StaticElement::changeSize(int width,int height){
+  void Progressbar::changeSize(int width,int height){
     this->xSize = width;
     this->ySize = height;
     SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
     fullUpdate();
   }
 
-  void StaticElement::show(){
+  void Progressbar::show(){
     ShowWindow(this->handle,SW_SHOW);
   }
 
-  void StaticElement::hide(){
+  void Progressbar::hide(){
     ShowWindow(this->handle,SW_HIDE);
   }
 
-  void StaticElement::disable(){
+  void Progressbar::disable(){
     this->disabled = true;
     update();
   }
 
-  void StaticElement::enable(){
+  void Progressbar::enable(){
     this->disabled = false;
     update();
   }

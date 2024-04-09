@@ -103,7 +103,17 @@ public:
 
   void setBackgroundOffColor(int r,int g,int b);
 
+  void setBackgroundOnColor(int r,int g,int b,int a);
+
+  void setBackgroundOffColor(int r,int g,int b,int a);
+
   void changePosition(int x,int y) override;
+
+  void changeSize(int width,int height) override;
+
+  void show();
+
+  void hide();
 
   void disable();
 

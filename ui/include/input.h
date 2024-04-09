@@ -122,6 +122,12 @@ public:
 
   void changePosition(int x,int y) override;
 
+  void changeSize(int width,int height) override;
+
+  void show();
+
+  void hide();
+
   void disable();
 
   void enable();

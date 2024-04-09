@@ -9,3 +9,4 @@
 #include "static_element.h" 
 #include "linear_layout.h"
 #include "group.h"
+#include "progressbar.h"

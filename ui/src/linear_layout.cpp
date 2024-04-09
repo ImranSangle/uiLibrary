@@ -177,6 +177,16 @@
           this->hover = false;
         }
       break;
+      case WM_SIZE:
+        {
+          if(this->onSize != nullptr){
+             this->onSize(this);
+          }
+          for(int i =0;i<this->childs.size();i++){
+             this->childs[i]->update();
+          }
+        }
+      break;
       case WM_PAINT:
        if(this->gotParentBitmap == false){
          getParentBitmap();
@@ -221,6 +231,10 @@
 
   int LinearLayout::getHeight(){
      return this->ySize;
+  }
+
+  std::vector<Element*> LinearLayout::getChilds(){
+     return this->childs; 
   }
 
   void LinearLayout::setParent(HWND parent){
@@ -271,6 +285,21 @@
     if(this->backgroundColor.GetA() < 255){
       fullUpdate();
     }
+  }
+
+  void LinearLayout::changeSize(int width,int height){
+    this->xSize = width;
+    this->ySize = height;
+    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
+    fullUpdate();
+  }
+
+  void LinearLayout::show(){
+    ShowWindow(this->handle,SW_SHOW);
+  }
+
+  void LinearLayout::hide(){
+    ShowWindow(this->handle,SW_HIDE);
   }
 
   void LinearLayout::disable(){

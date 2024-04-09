@@ -33,6 +33,7 @@ class LinearLayout : public Element{
 
 public:
   void(*onClick)(LinearLayout*) = nullptr;
+  void(*onSize)(LinearLayout*) = nullptr;
 private:
 
   void registerMouseCapure(HWND hwnd);
@@ -86,6 +87,8 @@ public:
 
   int getHeight() override;
 
+  std::vector<Element*> getChilds();
+
   void add(Element* element);
 
   void setParent(HWND parent) override; 
@@ -99,6 +102,12 @@ public:
   void setPadding(int paddingAmount);
 
   void changePosition(int x,int y) override;
+
+  void changeSize(int width,int height) override;
+
+  void show();
+
+  void hide();
 
   void disable();
 

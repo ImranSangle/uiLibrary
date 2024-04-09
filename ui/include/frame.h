@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <windows.h>
 #include <windowsx.h>
 #include <gdiplus.h>
@@ -17,12 +18,14 @@ class Frame{
   int yPos;
   int xSize;
   int ySize;
+  std::vector<Element*> childs;
   std::wstring backgroundImage;
   Color backgroundColor;
   bool isFocused = false;
 
 public:
   void(*onFocus)(Frame*) = nullptr;
+  void(*onSize)(Frame*) = nullptr;
   bool hasTitlebar = false;
 private:
 
@@ -62,5 +65,7 @@ public:
   int getWidth(); 
   
   int getHeight();
+
+  void quit();
 
 };

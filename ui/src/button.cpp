@@ -276,6 +276,21 @@
     fullUpdate();
   }
 
+  void Button::changeSize(int width,int height){
+    this->xSize = width;
+    this->ySize = height;
+    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
+    fullUpdate();
+  }
+
+  void Button::show(){
+    ShowWindow(this->handle,SW_SHOW);
+  }
+
+  void Button::hide(){
+    ShowWindow(this->handle,SW_HIDE);
+  }
+
   void Button::disable(){
     this->disabled = true;
     update();

@@ -8,51 +8,31 @@
 
 using namespace Gdiplus;
 
-class Button : public Element{
+class Progressbar : public Element{
   private:
   int xPos;
   int yPos;
   int xSize;
   int ySize;
-  int textSize;
+  float min = 0;
+  float max = 100;
+  float progress;
   HWND parent;
   bool gotParentBitmap = false;
   HBITMAP parentBitmap = NULL;
   HWND handle;
   Color backgroundColor;
-  Color textColor;
+  Color barColor;
   std::wstring backgroundImage; 
-  std::wstring text;
-  std::wstring font;
   bool hover = false;
   bool pressed = false;
   bool disabled = false;
 
 public:
-  void(*onClick)(Button*) = nullptr;
-  bool latchButton = false;
+  bool vertical = false;
+  bool reversed = false;
+  void(*onClick)(Progressbar*) = nullptr;
 private:
-
-  static void hoverAnimation(Button* object){
-
-     HDC dc = GetDC(object->handle);
-      
-     Graphics graphics(dc);
-
-     Rect rect = {0,0,object->xSize,object->ySize};
-
-     SolidBrush backbrush(Color(7,255,255,255));
-
-     for(int i =0;i<10;i++){
-      if(object->hover == false){
-        return;
-      }
-        graphics.FillRectangle(&backbrush,rect);
-        Sleep(1);
-      }
-
-     ReleaseDC(object->handle,dc);
-  }
 
   void registerMouseCapure(HWND hwnd);
 
@@ -64,15 +44,17 @@ private:
 
   void fullUpdate();
 
+  float remap(const float&,const float&,const float&,const float&,const float&);
+
   void paint(HWND hwnd); 
 
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
   
   static LRESULT CALLBACK callbackProcedure(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
-      Button* button = (Button*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
+      Progressbar* progressbar = (Progressbar*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
 
-      if(button != nullptr){
-         return button->callbackProcedureImplementation(hwnd, msg, wp, lp);
+      if(progressbar != nullptr){
+         return progressbar->callbackProcedureImplementation(hwnd, msg, wp, lp);
       }else{
          return DefWindowProcW(hwnd, msg, wp, lp);
       }
@@ -80,9 +62,9 @@ private:
 
 public: 
 
-  Button(HWND hwnd,int x,int y,int cx,int cy);
+  Progressbar(HWND hwnd,int x,int y,int cx,int cy);
 
-  ~Button();
+  ~Progressbar();
 
   int getX() override;
 
@@ -92,15 +74,13 @@ public:
 
   int getHeight() override;
 
+  float getMin();
+
+  float getMax();
+
+  float getProgress();
+
   void setParent(HWND parent) override; 
-
-  void setText(const std::wstring& name);
-
-  std::wstring getText();
-
-  void setTextColor(int r,int g,int b);
-
-  void setTextSize(int size);
 
   void setBackgroundColor(int r,int g,int b,int a);
 
@@ -108,7 +88,15 @@ public:
 
   void setBackgroundImage(const std::wstring& path);
 
-  void setFont(const std::wstring& fontname);
+  void setBarColor(int r,int g,int b,int a);
+
+  void setBarColor(int r,int g,int b);
+
+  void setMin(const float& value);
+
+  void setMax(const float& value);
+
+  void setProgress(const float& value);
 
   void changePosition(int x,int y) override;
 
@@ -121,7 +109,5 @@ public:
   void disable();
 
   void enable();
-
-  bool buttonState();
 
 };

@@ -363,6 +363,21 @@
     fullUpdate();
   }
   
+  void InputBox::changeSize(int width,int height){
+    this->xSize = width;
+    this->ySize = height;
+    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
+    fullUpdate();
+  }
+
+  void InputBox::show(){
+    ShowWindow(this->handle,SW_SHOW);
+  }
+
+  void InputBox::hide(){
+    ShowWindow(this->handle,SW_HIDE);
+  }
+
   void InputBox::disable(){
     this->disabled = true;
     update();

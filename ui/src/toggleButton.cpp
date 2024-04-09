@@ -240,12 +240,37 @@
     update();
   }
 
+  void ToggleButton::setBackgroundOnColor(int r,int g,int b,int a){
+     this->backgroundOnColor.SetValue(Color::MakeARGB(a,r,g,b));
+     update();
+  }
+
+  void ToggleButton::setBackgroundOffColor(int r,int g,int b,int a){
+     this->backgroundOnColor.SetValue(Color::MakeARGB(a,r,g,b));
+     update();
+  }
+
   void ToggleButton::changePosition(int x,int y){
     
     this->xPos = x;
     this->yPos = y;
     SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
     fullUpdate();
+  }
+
+  void ToggleButton::changeSize(int width,int height){
+    this->xSize = width;
+    this->ySize = height;
+    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
+    fullUpdate();
+  }
+
+  void ToggleButton::show(){
+    ShowWindow(this->handle,SW_SHOW);
+  }
+
+  void ToggleButton::hide(){
+    ShowWindow(this->handle,SW_HIDE);
   }
 
   void ToggleButton::disable(){

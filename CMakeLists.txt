@@ -19,6 +19,7 @@ ui/src/frame.cpp
 ui/src/element.cpp
 ui/src/linear_layout.cpp
 ui/src/group.cpp
+ui/src/progressbar.cpp
 )
 
 target_include_directories(uiLibrary PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/ui/include)

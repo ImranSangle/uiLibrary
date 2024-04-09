@@ -41,7 +41,7 @@
             POINT pt;
              pt.x = GET_X_LPARAM(lp);
              pt.y = GET_Y_LPARAM(lp);
-            if(WindowFromPoint(pt) == hwnd){
+            if(WindowFromPoint(pt) == hwnd && this->hasTitlebar == false){
                return HTCAPTION;
             }else{
                return DefWindowProcW(hwnd,msg,wp,lp);
@@ -63,6 +63,19 @@
         }
       break;
       case WM_SIZE:
+       {
+         RECT rect;
+         GetWindowRect(this->handle,&rect);
+         this->xSize = rect.right-rect.left;
+         this->ySize = rect.bottom-rect.top;
+         updateFrame();
+         if(this->onSize != nullptr){
+            this->onSize(this);
+         }
+         for(int i =0;i<this->childs.size();i++){
+             this->childs[i]->update();
+         }
+       }
       break;
       case WM_PAINT:
         this->paint(hwnd);
@@ -105,12 +118,12 @@
     DWORD windowStyles;
 
     if(hasTitlebar){
-      windowStyles = WS_CLIPCHILDREN | WS_BORDER | WS_VISIBLE | WS_OVERLAPPEDWINDOW;
+      windowStyles = WS_CLIPCHILDREN | WS_BORDER | WS_OVERLAPPEDWINDOW;
     }else{
-      windowStyles = WS_CLIPCHILDREN | WS_BORDER | WS_VISIBLE | WS_POPUP ;
+      windowStyles = WS_CLIPCHILDREN | WS_BORDER | WS_POPUP ;
     }
 
-    this->handle = CreateWindowExW(0,name.c_str(),L"mainWindow",windowStyles,this->xPos,this->yPos,this->xSize,this->ySize,NULL,NULL,NULL,NULL);
+    this->handle = CreateWindowExW(0,name.c_str(),name.c_str(),windowStyles,this->xPos,this->yPos,this->xSize,this->ySize,NULL,NULL,NULL,NULL);
 
     SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
   }
@@ -123,6 +136,7 @@
 
 
   void Frame::start(){
+    ShowWindow(this->handle,SW_SHOW);
     MSG msg;
     while(GetMessageW(&msg,0,0,0)){
       TranslateMessage(&msg);
@@ -132,6 +146,7 @@
 
   void Frame::add(Element* element){
       element->setParent(this->handle);
+      this->childs.push_back(element);
   }
 
   void Frame::setBackgroundColor(int r,int g,int b){
@@ -155,4 +170,8 @@
 
   int Frame::getHeight(){
      return this->ySize;
+  }
+
+  void Frame::quit(){
+     PostQuitMessage(0);
   }

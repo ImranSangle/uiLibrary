@@ -232,6 +232,21 @@
     }
   }
 
+  void Checkbox::changeSize(int width,int height){
+    this->xSize = width;
+    this->ySize = height;
+    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
+    fullUpdate();
+  }
+
+  void Checkbox::show(){
+    ShowWindow(this->handle,SW_SHOW);
+  }
+
+  void Checkbox::hide(){
+    ShowWindow(this->handle,SW_HIDE);
+  }
+
   void Checkbox::disable(){
     this->disabled = true;
     update();
