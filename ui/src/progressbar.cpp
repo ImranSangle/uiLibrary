@@ -1,6 +1,5 @@
 
 #include <progressbar.h>
-#include <thread>
 #include <iostream>
 #include <windef.h>
 #include <wingdi.h>
@@ -180,7 +179,7 @@
   }
 
   Progressbar::~Progressbar(){
-     DestroyWindow(this->parent);
+     DestroyWindow(this->handle);
      std::cout<<"Progressbar destroyed"<<std::endl;
   }
 

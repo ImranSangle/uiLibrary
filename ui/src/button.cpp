@@ -195,7 +195,7 @@
   }
 
   Button::~Button(){
-     DestroyWindow(this->parent);
+     DestroyWindow(this->handle);
      std::cout<<"button destroyed"<<std::endl;
   }
 

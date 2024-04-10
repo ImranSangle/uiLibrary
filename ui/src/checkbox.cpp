@@ -121,8 +121,9 @@
         SendMessageW((HWND)wp,WM_USER,true,0);
       break;
       case WM_LBUTTONDOWN:
-          SetFocus(hwnd);
-          // update();
+          if(this->disabled == false){
+            SetFocus(hwnd);
+          }
       break;
       case WM_LBUTTONUP:
         if(this->switchOn == true && this->disabled == false){
@@ -179,7 +180,7 @@
   }
 
   Checkbox::~Checkbox(){
-     DestroyWindow(this->parent);
+     DestroyWindow(this->handle);
      std::cout<<"Checkbox destroyed"<<std::endl;
   }
 

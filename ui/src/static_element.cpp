@@ -183,7 +183,7 @@
   }
 
   StaticElement::~StaticElement(){
-     DestroyWindow(this->parent);
+     DestroyWindow(this->handle);
      std::cout<<"StaticElement destroyed"<<std::endl;
   }
 

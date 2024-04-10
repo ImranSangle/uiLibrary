@@ -213,7 +213,7 @@
   }
 
   LinearLayout::~LinearLayout(){
-     DestroyWindow(this->parent);
+     DestroyWindow(this->handle);
      std::cout<<"LinearLayout destroyed"<<std::endl;
   }
 

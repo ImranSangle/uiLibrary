@@ -1,54 +1,56 @@
+#include "toggleButton.h"
+#include <iostream>
 #include <string>
-#include <uilibrary.h>
 #include <thread>
+#include <uilibrary.h>
 
 Frame* frame = new Frame(L"Facebook",10,10,600,400,true);
-Progressbar* progress = new Progressbar(NULL,frame->getWidth()/2,frame->getHeight()/2,200,10);
-StaticElement* text = new StaticElement(NULL,frame->getWidth()/2+210,frame->getHeight()/2,4,4);
+StaticElement* text = new StaticElement(NULL,310,50,3,3);
 
-void threadfun(){
+void slidercnange(Slider* slidu){
 
-  for(int i=0;i<1000;i++){
-    progress->setProgress(i);
-    text->setText(std::to_wstring((int)progress->getProgress()));
-    Sleep(10);
+  float position = slidu->getPosition();
+  std::cout<<"Slider's position is "<<position<<std::endl;
+
+}
+
+void threadproc(){
+
+  MSG msg;
+  while(PeekMessage(&msg,0,0,0,PM_NOREMOVE)){
+    TranslateMessage(&msg);
+    DispatchMessageW(&msg);
+    std::cout<<msg.message<<std::endl;
   }
-
 }
 
-void prog(Progressbar* p){
-  
-  static int pro = 0;
-  p->setProgress(pro);
-  pro++;
-}
+void click(Button* button){
 
+  frame->setBackgroundColor(255,0,0);
+
+}
 
 int main(){
 
   frame->setBackgroundColor(20,20,20);
 
-  
-  progress->setBackgroundColor(30,30,30);
-  progress->setBarColor(34,108,227);
-  progress->setMax(1000);
-  // progress->vertical = true;
-  // progress->reversed = true;
+  Slider* slider = new Slider(NULL,50,200,50);
+  slider->setMin(0);
+  slider->setMax(10);
+  slider->setBackgroundColor(50,50,50);
 
-  progress->onClick = prog;
+  slider->onChange = slidercnange;
 
   text->setTextSize(12);
   text->setBackgroundColor(20,20,20);
 
-  frame->add(progress);
-  frame->add(text);
+  frame->add(slider);
 
-  std::thread worker(threadfun);
+  std::thread worker(threadproc);
 
   worker.detach();
 
   frame->start();
 
- 
   return 0;
 }

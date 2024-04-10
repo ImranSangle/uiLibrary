@@ -160,7 +160,7 @@
   }
 
   Group::~Group(){
-     DestroyWindow(this->parent);
+     DestroyWindow(this->handle);
      std::cout<<"Group destroyed"<<std::endl;
   }
 

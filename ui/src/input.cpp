@@ -278,7 +278,7 @@
   }
 
   InputBox::~InputBox(){
-     DestroyWindow(this->parent);
+     DestroyWindow(this->handle);
      std::cout<<"inputbox destroyed"<<std::endl;
   }
 

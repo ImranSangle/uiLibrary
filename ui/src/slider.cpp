@@ -1,9 +1,11 @@
 
-#include <toggleButton.h>
-#include <thread>
-#include <iostream>
 
-  void ToggleButton::registerMouseCapure(HWND hwnd){
+#include "static_element.h"
+#include <slider.h>
+#include <iostream>
+#include <string>
+
+  void Slider::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
     tme.cbSize = sizeof(TRACKMOUSEEVENT);
     tme.dwFlags = TME_LEAVE;
@@ -12,7 +14,7 @@
 
   }
   
-  void ToggleButton::getParentBitmap(){
+  void Slider::getParentBitmap(){
      
      if(this->parentBitmap != NULL){
         DeleteObject(this->parentBitmap);
@@ -31,11 +33,11 @@
      ReleaseDC(this->parent,parentDc);
   }
 
-  void ToggleButton::update(){
+  void Slider::update(){
      InvalidateRect(this->handle,NULL,TRUE);
   }
 
-  void ToggleButton::updateParent(){
+  void Slider::updateParent(){
 
     RECT rt;
     rt.top = this->yPos;
@@ -45,14 +47,21 @@
     InvalidateRect(this->parent,&rt,TRUE);
   } 
 
-  void ToggleButton::fullUpdate(){
+  void Slider::fullUpdate(){
     
      updateParent();
      this->gotParentBitmap = false;
      update();
   }
 
-  void ToggleButton::DrawCircle(Graphics& graphics,SolidBrush& brush,const Point& center, float radius){
+  float Slider::remap(const float& value,const float& a,const float& b,const float& c,const float& d){
+      
+      float t = (value-a)/(b-a); 
+
+      return (c*(1.0f-t))+(d*t);
+  }
+
+  void Slider::DrawCircle(Graphics& graphics,SolidBrush& brush,const Point& center, float radius){
       // Calculate the top-left corner of the bounding rectangle
       float x = center.X - radius;
       float y = center.Y - radius;
@@ -61,7 +70,7 @@
       graphics.FillEllipse(&brush,boundingRect);
   }
 
-  void ToggleButton::paint(HWND hwnd){      
+  void Slider::paint(HWND hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
      HDC memoryDc = CreateCompatibleDC(dc);
@@ -76,53 +85,41 @@
 
      graphics.SetSmoothingMode(Gdiplus::SmoothingModeAntiAlias);
 
-     Rect rect = {2,2,this->xSize-4,this->ySize-4};
+     Rect rect = {6,8,this->xSize-12,4};
 
-     int borderRadius = rect.Height/2; // Adjust border radius as needed
+     int borderRadius = 2; // Adjust border radius as needed
 
      GraphicsPath path;
      path.AddArc(rect.X, rect.Y, 2 * borderRadius, 2 * borderRadius, 90, 180); // Left arc
      path.AddArc(rect.GetRight() - 2 * borderRadius, rect.Y, 2 * borderRadius, 2 * borderRadius, 270, 180); // Right arc
      path.CloseFigure();
 
-     Pen toggleStroke(Color(255,255,255),1);
+     SolidBrush railBrush(this->backgroundColor);
 
-     if(switchOn){
-       SolidBrush onBrush(this->backgroundOnColor);
-       graphics.FillPath(&onBrush,&path);
-     }else{
-       SolidBrush offBrush(Color(this->backgroundOffColor));
-       graphics.FillPath(&offBrush,&path);
-     }
+     graphics.FillPath(&railBrush,&path);
 
-    float knobRadius = borderRadius-this->ySize/6.0f;
+    float knobRadius = this->ySize/4.0f;
 
     if(this->hover){
 
-      // SolidBrush hoverBrush(Color(75,255,255,255));
-      //
-      // graphics.FillPath(&hoverBrush,&path);
-      
-      knobRadius = borderRadius-this->ySize/10.0f;
+      SolidBrush hoverBrush(Color(70,255,255,255));
+
+      graphics.FillPath(&hoverBrush,&path);
+
+      knobRadius = this->ySize/3.0f; 
       
     }
 
-    if(this->switchOn){
-      SolidBrush knobOnBrush(Color(255,255,255));
-      Point center((this->ySize/2)+(this->xSize/2),this->ySize/2);
-      DrawCircle(graphics,knobOnBrush,center,knobRadius);
-    }else{
-      SolidBrush knobOffBrush(Color(200,200,200));
-      Point center(this->ySize/2,this->ySize/2);
-      DrawCircle(graphics,knobOffBrush,center,knobRadius);
-      graphics.DrawPath(&toggleStroke,&path);
-    }
-
+    SolidBrush knobOnBrush(this->knobColor);
+    Point center(std::max(6,std::min(this->knobPosition,this->xSize-10)),this->ySize/2);
+    this->position = remap(center.X,6,this->xSize-10,this->min,this->max);
+    DrawCircle(graphics,knobOnBrush,center,knobRadius);
 
     if(this->disabled){
       SolidBrush disabledBrush(Color(128,0,0,0));
 
       graphics.FillPath(&disabledBrush,&path);
+      DrawCircle(graphics,disabledBrush,center,knobRadius);
     }
      
      BitBlt(dc,0,0,this->xSize,this->ySize,memoryDc,0,0,SRCCOPY);
@@ -133,39 +130,66 @@
      EndPaint(hwnd,&ps);
   }
 
-  LRESULT CALLBACK ToggleButton::callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
+  LRESULT CALLBACK Slider::callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
       switch(msg){
       case WM_SETFOCUS:
         SendMessageW((HWND)wp,WM_USER,true,0);
       break;
       case WM_LBUTTONDOWN:
-          SetFocus(hwnd);
+      case WM_LBUTTONDBLCLK:
+          if(this->disabled == false){
+           this->latched = true;
+           this->knobPosition = GET_X_LPARAM(lp);
+
+           if(isHint){
+             this->hint = new StaticElement(NULL,this->knobPosition,this->yPos-this->ySize,2,2);
+             hint->setTextSize(12);
+             hint->setBackgroundColor(this->backgroundColor.GetR(),this->backgroundColor.GetG(),this->backgroundColor.GetB());
+             hint->setParent(this->parent);
+             hint->setText(std::to_wstring(this->position));
+           }
+
+           update();
+           SetFocus(hwnd);
+             if(this->onChange != nullptr){
+               this->onChange(this);
+             }
+          }
       break;
       case WM_LBUTTONUP:
-        if(this->switchOn == true && this->disabled == false){
-          this->switchOn = false;
-          update();
-        }else if(this->switchOn == false && this->disabled == false){
-          this->switchOn = true;
-          update();
-        }
-
-        if(this->onChange != nullptr){
-          onChange(this);
+        if(this->disabled == false){
+          this->latched = false;
+          if(this->hint != nullptr){
+            delete this->hint;
+            this->hint = nullptr;
+          }
         }
       break;
       case WM_MOUSEMOVE:
         if(this->hover == false && this->disabled == false){
           registerMouseCapure(hwnd);
           this->hover = true;
-          std::thread worker(ToggleButton::hoverAnimation,this);
-          worker.detach();
           update();
+        }
+        if(this->latched){
+          this->knobPosition = GET_X_LPARAM(lp);
+          if(this->hint != nullptr){
+            this->hint->setText(std::to_wstring(this->position));
+          }
+          update();
+           if(this->onChange != nullptr){
+             this->onChange(this);
+           }
         }
       break;
       case WM_MOUSELEAVE:
         if(this->hover == true && this->disabled == false){
           this->hover = false;
+          this->latched = false;
+          if(this->hint != nullptr){
+            delete this->hint;
+            this->hint = nullptr;
+          }
           update();
         }
       break;
@@ -185,71 +209,91 @@
   }
   
 
-  ToggleButton::ToggleButton(HWND hwnd,int x,int y,int size){
+  Slider::Slider(HWND hwnd,int x,int y,int size){
      this->xPos = x;
      this->yPos = y;
-     this->xSize = size*2;
-     this->ySize = size;
+     this->xSize = size;
+     this->ySize = 20;
      this->parent = hwnd;
-     this->backgroundOnColor.SetFromCOLORREF(RGB(34,108,224));
-     this->backgroundOffColor.SetFromCOLORREF(RGB(50,50,50));
+     this->backgroundColor.SetFromCOLORREF(RGB(30,30,30));
+     this->knobColor.SetFromCOLORREF(RGB(34,108,224));
   }
 
-  ToggleButton::~ToggleButton(){
+  Slider::~Slider(){
      DestroyWindow(this->handle);
-     std::cout<<"ToggleButton destroyed"<<std::endl;
+     std::cout<<"Slider destroyed"<<std::endl;
   }
 
-  int ToggleButton::getX(){
+  int Slider::getX(){
      return this->xPos;
   }
 
-  int ToggleButton::getY(){
+  int Slider::getY(){
      return this->yPos;
   }
 
-  int ToggleButton::getWidth(){
+  int Slider::getWidth(){
      return this->xSize;
   }
 
-  int ToggleButton::getHeight(){
+  int Slider::getHeight(){
      return this->ySize;
   }
 
-  void ToggleButton::setParent(HWND parent){
+  float Slider::getMin(){
+     return this->min;
+  }
+
+  float Slider::getMax(){
+     return this->max;
+  }
+
+  float Slider::getPosition(){
+     return this->position;
+  }
+
+  void Slider::setParent(HWND parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
 
       SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
-      SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)ToggleButton::callbackProcedure);
+      SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)Slider::callbackProcedure);
 
       std::cout<<"toggleButton created"<<std::endl;
   }
 
 
-  void ToggleButton::setBackgroundOnColor(int r,int g,int b){
+  void Slider::setBackgroundColor(int r,int g,int b){
      
-     this->backgroundOnColor.SetFromCOLORREF(RGB(r,g,b));
+     this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
     update();
   }
 
-  void ToggleButton::setBackgroundOffColor(int r,int g,int b){
+  void Slider::setKnobColor(int r,int g,int b){
      
-     this->backgroundOffColor.SetFromCOLORREF(RGB(r,g,b));
+     this->knobColor.SetFromCOLORREF(RGB(r,g,b));
     update();
   }
 
-  void ToggleButton::setBackgroundOnColor(int r,int g,int b,int a){
-     this->backgroundOnColor.SetValue(Color::MakeARGB(a,r,g,b));
+  void Slider::setBackgroundColor(int r,int g,int b,int a){
+     this->backgroundColor.SetValue(Color::MakeARGB(a,r,g,b));
      update();
   }
 
-  void ToggleButton::setBackgroundOffColor(int r,int g,int b,int a){
-     this->backgroundOnColor.SetValue(Color::MakeARGB(a,r,g,b));
+  void Slider::setKnobColor(int r,int g,int b,int a){
+     this->knobColor.SetValue(Color::MakeARGB(a,r,g,b));
      update();
   }
 
-  void ToggleButton::changePosition(int x,int y){
+  void Slider::setMin(const float& value){
+     this->min = value;
+  }
+
+  void Slider::setMax(const float& value){
+     this->max = value;
+  }
+
+  void Slider::changePosition(int x,int y){
     
     this->xPos = x;
     this->yPos = y;
@@ -257,31 +301,35 @@
     fullUpdate();
   }
 
-  void ToggleButton::changeSize(int width,int height){
+  void Slider::changeSize(int width,int height){
     this->xSize = width;
     this->ySize = height;
     SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
     fullUpdate();
   }
 
-  void ToggleButton::show(){
+  void Slider::show(){
     ShowWindow(this->handle,SW_SHOW);
   }
 
-  void ToggleButton::hide(){
+  void Slider::hide(){
     ShowWindow(this->handle,SW_HIDE);
   }
 
-  void ToggleButton::disable(){
+  void Slider::disable(){
     this->disabled = true;
     update();
   }
 
-  void ToggleButton::enable(){
+  void Slider::enable(){
     this->disabled = false;
     update();
   }
 
-  bool ToggleButton::buttonState(){
-    return this->switchOn;
-  } 
+  void Slider::enableHint(){
+    this->isHint = true;
+  }
+
+  void Slider::disableHint(){
+    this->isHint = false;
+  }

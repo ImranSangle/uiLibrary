@@ -10,3 +10,4 @@
 #include "linear_layout.h"
 #include "group.h"
 #include "progressbar.h"
+#include "slider.h" 
