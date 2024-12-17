@@ -1,6 +1,6 @@
 
 
-add_executable(uiTest window.cpp)
+add_executable(uiTest test.cpp)
 
 target_link_libraries(uiTest PRIVATE uiLibrary)
 
