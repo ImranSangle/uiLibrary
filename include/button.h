@@ -10,15 +10,7 @@ using namespace Gdiplus;
 
 class Button : public Element{
   private:
-  int xPos;
-  int yPos;
-  int xSize;
-  int ySize;
   int textSize;
-  HWND parent;
-  bool gotParentBitmap = false;
-  HBITMAP parentBitmap = NULL;
-  HWND handle;
   Color backgroundColor;
   Color textColor;
   std::wstring backgroundImage; 
@@ -26,7 +18,6 @@ class Button : public Element{
   std::wstring font;
   bool hover = false;
   bool pressed = false;
-  bool disabled = false;
 
 public:
   void(*onClick)(Button*) = nullptr;
@@ -58,15 +49,9 @@ private:
 
   void getParentBitmap();
 
-  void update();
-
-  void updateParent();
-
-  void fullUpdate();
-
   void paint(HWND hwnd); 
 
-  LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
+  LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) override;
   
   static LRESULT CALLBACK callbackProcedure(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
       Button* button = (Button*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
@@ -84,15 +69,7 @@ public:
 
   ~Button();
 
-  int getX() override;
-
-  int getY() override;
-
-  int getWidth() override;
-
-  int getHeight() override;
-
-  void setParent(HWND parent) override; 
+  void setParent(const HWND& parent) override; 
 
   void setText(const std::wstring& name);
 
@@ -109,18 +86,6 @@ public:
   void setBackgroundImage(const std::wstring& path);
 
   void setFont(const std::wstring& fontname);
-
-  void changePosition(int x,int y) override;
-
-  void changeSize(int width,int height) override;
-
-  void show();
-
-  void hide();
-
-  void disable();
-
-  void enable();
 
   bool buttonState();
 

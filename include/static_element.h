@@ -10,15 +10,7 @@ using namespace Gdiplus;
 
 class StaticElement : public Element{
   private:
-  int xPos;
-  int yPos;
-  int xSize;
-  int ySize;
   int textSize;
-  HWND parent;
-  bool gotParentBitmap = false;
-  HBITMAP parentBitmap = NULL;
-  HWND handle;
   Color backgroundColor;
   Color textColor;
   std::wstring backgroundImage; 
@@ -26,7 +18,6 @@ class StaticElement : public Element{
   std::wstring font;
   bool hover = false;
   bool pressed = false;
-  bool disabled = false;
   bool autoResize = false;
 
 public:
@@ -37,15 +28,9 @@ private:
 
   void getParentBitmap();
 
-  void update();
-
-  void updateParent();
-
-  void fullUpdate();
-
   void paint(HWND hwnd); 
 
-  LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
+  LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) override;
   
   static LRESULT CALLBACK callbackProcedure(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
       StaticElement* staticElement = (StaticElement*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
@@ -63,15 +48,9 @@ public:
 
   ~StaticElement();
 
-  int getX() override;
+  void setParent(const HWND& parent) override; 
 
-  int getY() override;
-
-  int getWidth() override;
-
-  int getHeight() override;
-
-  void setParent(HWND parent) override; 
+  void changePosition(const int& x,const int& y) override;
 
   void setText(const std::wstring& name);
 
@@ -88,17 +67,4 @@ public:
   void setBackgroundImage(const wchar_t* path);
 
   void setFont(const wchar_t* fontname);
-
-  void changePosition(int x,int y) override;
-
-  void changeSize(int width,int height) override;
-
-  void show();
-
-  void hide();
-  
-  void disable();
-
-  void enable();
-
 };

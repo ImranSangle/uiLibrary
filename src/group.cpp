@@ -1,7 +1,7 @@
 #include <group.h>
-#include <iostream>
 #include <windef.h>
 #include <wingdi.h>
+#include "log.h"
 
   void Group::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
@@ -29,27 +29,6 @@
      SelectObject(memoryDc,oldBitmap);
      DeleteDC(memoryDc);
      ReleaseDC(this->parent,parentDc);
-  }
-
-  void Group::update(){
-     InvalidateRect(this->handle,NULL,TRUE);
-  }
-
-  void Group::updateParent(){
-
-    RECT rt;
-    rt.top = this->yPos;
-    rt.left = this->xPos;
-    rt.right = this->xSize+this->xPos;
-    rt.bottom = this->ySize+this->yPos;
-    InvalidateRect(this->parent,&rt,TRUE);
-  } 
-
-  void Group::fullUpdate(){
-    
-     updateParent();
-     this->gotParentBitmap = false;
-     update();
   }
 
   void Group::paint(HWND hwnd){      
@@ -161,37 +140,21 @@
 
   Group::~Group(){
      DestroyWindow(this->handle);
-     std::cout<<"Group destroyed"<<std::endl;
-  }
-
-  int Group::getX(){
-     return this->xPos;
-  }
-
-  int Group::getY(){
-     return this->yPos;
-  }
-
-  int Group::getWidth(){
-     return this->xSize;
-  }
-
-  int Group::getHeight(){
-     return this->ySize;
+     LOG("Group destroyed");
   }
 
   std::vector<Element*> Group::getChilds(){
      return this->childs; 
   }
 
-  void Group::setParent(HWND parent){
+  void Group::setParent(const HWND& parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,NULL,NULL,NULL);
 
       SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
       SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)Group::callbackProcedure);
 
-      std::cout<<"Group created"<<std::endl;
+      LOG("Group created");
   }
 
   void Group::add(Element* element){
@@ -222,7 +185,7 @@
     this->padding = paddingAmount;
   }
 
-  void Group::changePosition(int x,int y){
+  void Group::changePosition(const int& x,const int& y){
     
     this->xPos = x;
     this->yPos = y;
@@ -233,29 +196,4 @@
          this->childs[i]->fullUpdate();
       }
     }
-  }
-
-  void Group::changeSize(int width,int height){
-    this->xSize = width;
-    this->ySize = height;
-    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
-    fullUpdate();
-  }
-
-  void Group::show(){
-    ShowWindow(this->handle,SW_SHOW);
-  }
-
-  void Group::hide(){
-    ShowWindow(this->handle,SW_HIDE);
-  }
-
-  void Group::disable(){
-    this->disabled = true;
-    update();
-  }
-
-  void Group::enable(){
-    this->disabled = false;
-    update();
   }

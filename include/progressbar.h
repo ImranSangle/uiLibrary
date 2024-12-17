@@ -10,23 +10,14 @@ using namespace Gdiplus;
 
 class Progressbar : public Element{
   private:
-  int xPos;
-  int yPos;
-  int xSize;
-  int ySize;
   float min = 0;
   float max = 100;
   float progress;
-  HWND parent;
-  bool gotParentBitmap = false;
-  HBITMAP parentBitmap = NULL;
-  HWND handle;
   Color backgroundColor;
   Color barColor;
   std::wstring backgroundImage; 
   bool hover = false;
   bool pressed = false;
-  bool disabled = false;
 
 public:
   bool vertical = false;
@@ -38,17 +29,11 @@ private:
 
   void getParentBitmap();
 
-  void update();
-
-  void updateParent();
-
-  void fullUpdate();
-
   float remap(const float&,const float&,const float&,const float&,const float&);
 
   void paint(HWND hwnd); 
 
-  LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
+  LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) override;
   
   static LRESULT CALLBACK callbackProcedure(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
       Progressbar* progressbar = (Progressbar*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
@@ -66,21 +51,13 @@ public:
 
   ~Progressbar();
 
-  int getX() override;
-
-  int getY() override;
-
-  int getWidth() override;
-
-  int getHeight() override;
-
   float getMin();
 
   float getMax();
 
   float getProgress();
 
-  void setParent(HWND parent) override; 
+  void setParent(const HWND& parent) override; 
 
   void setBackgroundColor(int r,int g,int b,int a);
 
@@ -97,17 +74,4 @@ public:
   void setMax(const float& value);
 
   void setProgress(const float& value);
-
-  void changePosition(int x,int y) override;
-
-  void changeSize(int width,int height) override;
-
-  void show();
-
-  void hide();
-
-  void disable();
-
-  void enable();
-
 };

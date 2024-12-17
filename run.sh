@@ -23,7 +23,7 @@ test(){
     build
     compile
   fi
-  ctest
+  ctest -VV
 }
 
 run(){

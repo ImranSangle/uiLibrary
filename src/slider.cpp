@@ -1,9 +1,8 @@
 
-
 #include "static_element.h"
 #include <slider.h>
-#include <iostream>
 #include <string>
+#include "log.h"
 
   void Slider::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
@@ -31,27 +30,6 @@
      SelectObject(memoryDc,oldBitmap);
      DeleteDC(memoryDc);
      ReleaseDC(this->parent,parentDc);
-  }
-
-  void Slider::update(){
-     InvalidateRect(this->handle,NULL,TRUE);
-  }
-
-  void Slider::updateParent(){
-
-    RECT rt;
-    rt.top = this->yPos;
-    rt.left = this->xPos;
-    rt.right = this->xSize+this->xPos;
-    rt.bottom = this->ySize+this->yPos;
-    InvalidateRect(this->parent,&rt,TRUE);
-  } 
-
-  void Slider::fullUpdate(){
-    
-     updateParent();
-     this->gotParentBitmap = false;
-     update();
   }
 
   float Slider::remap(const float& value,const float& a,const float& b,const float& c,const float& d){
@@ -221,23 +199,7 @@
 
   Slider::~Slider(){
      DestroyWindow(this->handle);
-     std::cout<<"Slider destroyed"<<std::endl;
-  }
-
-  int Slider::getX(){
-     return this->xPos;
-  }
-
-  int Slider::getY(){
-     return this->yPos;
-  }
-
-  int Slider::getWidth(){
-     return this->xSize;
-  }
-
-  int Slider::getHeight(){
-     return this->ySize;
+     LOG("Slider destroyed");
   }
 
   float Slider::getMin(){
@@ -252,14 +214,14 @@
      return this->position;
   }
 
-  void Slider::setParent(HWND parent){
+  void Slider::setParent(const HWND& parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
 
       SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
       SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)Slider::callbackProcedure);
 
-      std::cout<<"toggleButton created"<<std::endl;
+      LOG("toggleButton created");
   }
 
 
@@ -291,39 +253,6 @@
 
   void Slider::setMax(const float& value){
      this->max = value;
-  }
-
-  void Slider::changePosition(int x,int y){
-    
-    this->xPos = x;
-    this->yPos = y;
-    SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    fullUpdate();
-  }
-
-  void Slider::changeSize(int width,int height){
-    this->xSize = width;
-    this->ySize = height;
-    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
-    fullUpdate();
-  }
-
-  void Slider::show(){
-    ShowWindow(this->handle,SW_SHOW);
-  }
-
-  void Slider::hide(){
-    ShowWindow(this->handle,SW_HIDE);
-  }
-
-  void Slider::disable(){
-    this->disabled = true;
-    update();
-  }
-
-  void Slider::enable(){
-    this->disabled = false;
-    update();
   }
 
   void Slider::enableHint(){

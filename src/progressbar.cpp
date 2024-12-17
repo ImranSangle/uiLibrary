@@ -1,8 +1,8 @@
 
 #include <progressbar.h>
-#include <iostream>
 #include <windef.h>
 #include <wingdi.h>
+#include "log.h"
 
   void Progressbar::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
@@ -30,27 +30,6 @@
      SelectObject(memoryDc,oldBitmap);
      DeleteDC(memoryDc);
      ReleaseDC(this->parent,parentDc);
-  }
-
-  void Progressbar::update(){
-     InvalidateRect(this->handle,NULL,TRUE);
-  }
-
-  void Progressbar::updateParent(){
-
-    RECT rt;
-    rt.top = this->yPos;
-    rt.left = this->xPos;
-    rt.right = this->xSize+this->xPos;
-    rt.bottom = this->ySize+this->yPos;
-    InvalidateRect(this->parent,&rt,TRUE);
-  } 
-
-  void Progressbar::fullUpdate(){
-    
-     updateParent();
-     this->gotParentBitmap = false;
-     update();
   }
 
   float Progressbar::remap(const float& value,const float& a,const float& b,const float& c,const float& d){
@@ -180,23 +159,7 @@
 
   Progressbar::~Progressbar(){
      DestroyWindow(this->handle);
-     std::cout<<"Progressbar destroyed"<<std::endl;
-  }
-
-  int Progressbar::getX(){
-     return this->xPos;
-  }
-
-  int Progressbar::getY(){
-     return this->yPos;
-  }
-
-  int Progressbar::getWidth(){
-     return this->xSize;
-  }
-
-  int Progressbar::getHeight(){
-     return this->ySize;
+     LOG("Progressbar destroyed");
   }
 
   float Progressbar::getMin(){
@@ -211,14 +174,14 @@
      return this->progress;
   }
 
-  void Progressbar::setParent(HWND parent){
+  void Progressbar::setParent(const HWND& parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
 
       SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
       SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)Progressbar::callbackProcedure);
 
-      std::cout<<"button created"<<std::endl;
+      LOG("button created");
   }
 
   void Progressbar::setBackgroundColor(int r,int g,int b,int a){
@@ -270,35 +233,3 @@
      }
   }
 
-  void Progressbar::changePosition(int x,int y){
-    
-    this->xPos = x;
-    this->yPos = y;
-    SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    fullUpdate();
-  }
-
-  void Progressbar::changeSize(int width,int height){
-    this->xSize = width;
-    this->ySize = height;
-    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
-    fullUpdate();
-  }
-
-  void Progressbar::show(){
-    ShowWindow(this->handle,SW_SHOW);
-  }
-
-  void Progressbar::hide(){
-    ShowWindow(this->handle,SW_HIDE);
-  }
-
-  void Progressbar::disable(){
-    this->disabled = true;
-    update();
-  }
-
-  void Progressbar::enable(){
-    this->disabled = false;
-    update();
-  }

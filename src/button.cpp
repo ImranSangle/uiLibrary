@@ -1,7 +1,7 @@
 
+#include "log.h"
 #include <button.h>
 #include <thread>
-#include <iostream>
 #include <windef.h>
 #include <wingdi.h>
 
@@ -31,27 +31,6 @@
      SelectObject(memoryDc,oldBitmap);
      DeleteDC(memoryDc);
      ReleaseDC(this->parent,parentDc);
-  }
-
-  void Button::update(){
-     InvalidateRect(this->handle,NULL,TRUE);
-  }
-
-  void Button::updateParent(){
-
-    RECT rt;
-    rt.top = this->yPos;
-    rt.left = this->xPos;
-    rt.right = this->xSize+this->xPos;
-    rt.bottom = this->ySize+this->yPos;
-    InvalidateRect(this->parent,&rt,TRUE);
-  } 
-
-  void Button::fullUpdate(){
-    
-     updateParent();
-     this->gotParentBitmap = false;
-     update();
   }
 
   void Button::paint(HWND hwnd){      
@@ -196,33 +175,17 @@
 
   Button::~Button(){
      DestroyWindow(this->handle);
-     std::cout<<"button destroyed"<<std::endl;
+     LOG("Button Destroyed");
   }
 
-  int Button::getX(){
-     return this->xPos;
-  }
-
-  int Button::getY(){
-     return this->yPos;
-  }
-
-  int Button::getWidth(){
-     return this->xSize;
-  }
-
-  int Button::getHeight(){
-     return this->ySize;
-  }
-
-  void Button::setParent(HWND parent){
+  void Button::setParent(const HWND& parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
 
       SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
       SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)Button::callbackProcedure);
 
-      std::cout<<"button created"<<std::endl;
+      LOG("Button Created");
   }
 
   void Button::setText(const std::wstring& name){
@@ -265,39 +228,6 @@
 
   void Button::setFont(const std::wstring& fontname){
     this->font = fontname;
-    update();
-  }
-
-  void Button::changePosition(int x,int y){
-    
-    this->xPos = x;
-    this->yPos = y;
-    SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    fullUpdate();
-  }
-
-  void Button::changeSize(int width,int height){
-    this->xSize = width;
-    this->ySize = height;
-    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
-    fullUpdate();
-  }
-
-  void Button::show(){
-    ShowWindow(this->handle,SW_SHOW);
-  }
-
-  void Button::hide(){
-    ShowWindow(this->handle,SW_HIDE);
-  }
-
-  void Button::disable(){
-    this->disabled = true;
-    update();
-  }
-
-  void Button::enable(){
-    this->disabled = false;
     update();
   }
 

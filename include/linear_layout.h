@@ -11,24 +11,15 @@ using namespace Gdiplus;
 
 class LinearLayout : public Element{
   private:
-  int xPos;
-  int yPos;
-  int xSize;
-  int ySize;
   float yLength = 0;
   float padding = 0;
   float scrollbarYPosition = 0;
   int scrollVelocity = 0;
   WPARAM scrollDirection;
-  HWND parent;
-  bool gotParentBitmap = false;
-  HBITMAP parentBitmap = NULL;
-  HWND handle;
   Color backgroundColor;
   std::wstring backgroundImage; 
   bool hover = false;
   bool pressed = false;
-  bool disabled = false;
   std::vector<Element*> childs;
 
 public:
@@ -40,19 +31,13 @@ private:
 
   void getParentBitmap();
 
-  void update();
-
-  void updateParent();
-
-  void fullUpdate();
-
   void updateScrollbar();
 
   void scroll(WPARAM wp,int velocity);
 
   void paint(HWND hwnd); 
 
-  LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
+  LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) override;
   
   static LRESULT CALLBACK callbackProcedure(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
       LinearLayout* linearLayout = (LinearLayout*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
@@ -79,19 +64,13 @@ public:
 
   ~LinearLayout();
 
-  int getX() override;
-
-  int getY() override;
-
-  int getWidth() override;
-
-  int getHeight() override;
-
   std::vector<Element*> getChilds();
 
   void add(Element* element);
 
-  void setParent(HWND parent) override; 
+  void setParent(const HWND& parent) override; 
+
+  void changePosition(const int& x,const int& y) override;
 
   void setBackgroundColor(int r,int g,int b,int a);
 
@@ -101,15 +80,4 @@ public:
 
   void setPadding(int paddingAmount);
 
-  void changePosition(int x,int y) override;
-
-  void changeSize(int width,int height) override;
-
-  void show();
-
-  void hide();
-
-  void disable();
-
-  void enable();
 };

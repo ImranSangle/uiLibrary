@@ -3,25 +3,58 @@
 #include <windows.h>
 
 class Element{
-  private:
+  protected:
+  int xPos;
+  int yPos;
+  int xSize;
+  int ySize;
+  bool disabled = false;
+  HWND parent;
+  HWND handle;
+  bool gotParentBitmap = false;
+  HBITMAP parentBitmap = NULL;
+
+  virtual void updateParent() const;
+
+  virtual LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
+  
+  static LRESULT CALLBACK callbackProcedure(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
+      Element* element = (Element*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
+
+      if(element != nullptr){
+         return element->callbackProcedureImplementation(hwnd, msg, wp, lp);
+      }else{
+         return DefWindowProcW(hwnd, msg, wp, lp);
+      }
+  }
+
   public:
 
-  virtual void update() = 0;
+  virtual void update() const;
 
-  virtual void fullUpdate() = 0;
+  virtual void fullUpdate();
 
-  virtual void setParent(HWND parent) = 0;
+  virtual void setParent(const HWND& parent);
 
-  virtual void changePosition(int x,int y) = 0;
+  virtual void changePosition(const int& x,const int& y);
   
-  virtual void changeSize(int width,int height) = 0;
+  virtual void changeSize(const int& width,const int& height);
 
-  virtual int getX() = 0;
+  virtual int getX() const;
 
-  virtual int getY() = 0;
+  virtual int getY() const;
 
-  virtual int getWidth() = 0;
+  virtual int getWidth() const;
 
-  virtual int getHeight() = 0;
+  virtual int getHeight() const;
 
+  virtual void show() const;
+
+  virtual void hide() const;
+
+  virtual void disable();
+
+  virtual void enable();
+
+  virtual ~Element();
 };

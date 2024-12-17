@@ -1,6 +1,6 @@
   #include <input.h>
   #include <thread>
-  #include <iostream>
+  #include "log.h"
 
   void InputBox::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
@@ -28,27 +28,6 @@
      SelectObject(memoryDc,oldBitmap);
      DeleteDC(memoryDc);
      ReleaseDC(this->parent,parentDc);
-  }
-
-  void InputBox::update(){
-     InvalidateRect(this->handle,NULL,TRUE);
-  }
-
-  void InputBox::updateParent(){
-
-    RECT rt;
-    rt.top = this->yPos;
-    rt.left = this->xPos;
-    rt.right = this->xSize+this->xPos;
-    rt.bottom = this->ySize+this->yPos;
-    InvalidateRect(this->parent,&rt,TRUE);
-  } 
-
-  void InputBox::fullUpdate(){
-    
-     updateParent();
-     this->gotParentBitmap = false;
-     update();
   }
 
   void InputBox::handleKeyboardEvents(HWND hwnd,WPARAM wp){
@@ -279,33 +258,17 @@
 
   InputBox::~InputBox(){
      DestroyWindow(this->handle);
-     std::cout<<"inputbox destroyed"<<std::endl;
+     LOG("inputbox destroyed");
   }
 
-  int InputBox::getX(){
-     return this->xPos;
-  }
-
-  int InputBox::getY(){
-     return this->yPos;
-  }
-
-  int InputBox::getWidth(){
-     return this->xSize;
-  }
-
-  int InputBox::getHeight(){
-     return this->ySize;
-  }
-
-  void InputBox::setParent(HWND parent){
+  void InputBox::setParent(const HWND& parent){
      this->parent = parent;
      this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
 
      SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
      SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)InputBox::callbackProcedure);
 
-     std::cout<<"inputbox created"<<std::endl;
+     LOG("inputbox created");
   }
 
   void InputBox::setText(const std::wstring& name){
@@ -352,39 +315,6 @@
 
   void InputBox::setFont(const std::wstring& fontname){
     this->font = fontname;
-    update();
-  }
-
-  void InputBox::changePosition(int x,int y){
-    
-    this->xPos = x;
-    this->yPos = y;
-    SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    fullUpdate();
-  }
-  
-  void InputBox::changeSize(int width,int height){
-    this->xSize = width;
-    this->ySize = height;
-    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
-    fullUpdate();
-  }
-
-  void InputBox::show(){
-    ShowWindow(this->handle,SW_SHOW);
-  }
-
-  void InputBox::hide(){
-    ShowWindow(this->handle,SW_HIDE);
-  }
-
-  void InputBox::disable(){
-    this->disabled = true;
-    update();
-  }
-
-  void InputBox::enable(){
-    this->disabled = false;
     update();
   }
 

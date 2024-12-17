@@ -1,9 +1,9 @@
 
 #include <linear_layout.h>
-#include <iostream>
 #include <windef.h>
 #include <wingdi.h>
 #include <thread>
+#include "log.h"
 
   void LinearLayout::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
@@ -31,27 +31,6 @@
      SelectObject(memoryDc,oldBitmap);
      DeleteDC(memoryDc);
      ReleaseDC(this->parent,parentDc);
-  }
-
-  void LinearLayout::update(){
-     InvalidateRect(this->handle,NULL,TRUE);
-  }
-
-  void LinearLayout::updateParent(){
-
-    RECT rt;
-    rt.top = this->yPos;
-    rt.left = this->xPos;
-    rt.right = this->xSize+this->xPos;
-    rt.bottom = this->ySize+this->yPos;
-    InvalidateRect(this->parent,&rt,TRUE);
-  } 
-
-  void LinearLayout::fullUpdate(){
-    
-     updateParent();
-     this->gotParentBitmap = false;
-     update();
   }
 
   void LinearLayout::updateScrollbar(){
@@ -214,37 +193,21 @@
 
   LinearLayout::~LinearLayout(){
      DestroyWindow(this->handle);
-     std::cout<<"LinearLayout destroyed"<<std::endl;
-  }
-
-  int LinearLayout::getX(){
-     return this->xPos;
-  }
-
-  int LinearLayout::getY(){
-     return this->yPos;
-  }
-
-  int LinearLayout::getWidth(){
-     return this->xSize;
-  }
-
-  int LinearLayout::getHeight(){
-     return this->ySize;
+     LOG("LinearLayout destroyed");
   }
 
   std::vector<Element*> LinearLayout::getChilds(){
      return this->childs; 
   }
 
-  void LinearLayout::setParent(HWND parent){
+  void LinearLayout::setParent(const HWND& parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,NULL,NULL,NULL);
 
       SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
       SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)LinearLayout::callbackProcedure);
 
-      std::cout<<"LinearLayout created"<<std::endl;
+      LOG("LinearLayout created");
   }
 
   void LinearLayout::add(Element* element){
@@ -277,7 +240,7 @@
     this->padding = paddingAmount;
   }
 
-  void LinearLayout::changePosition(int x,int y){
+  void LinearLayout::changePosition(const int& x,const int& y){
     
     this->xPos = x;
     this->yPos = y;
@@ -285,29 +248,4 @@
     if(this->backgroundColor.GetA() < 255){
       fullUpdate();
     }
-  }
-
-  void LinearLayout::changeSize(int width,int height){
-    this->xSize = width;
-    this->ySize = height;
-    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
-    fullUpdate();
-  }
-
-  void LinearLayout::show(){
-    ShowWindow(this->handle,SW_SHOW);
-  }
-
-  void LinearLayout::hide(){
-    ShowWindow(this->handle,SW_HIDE);
-  }
-
-  void LinearLayout::disable(){
-    this->disabled = true;
-    update();
-  }
-
-  void LinearLayout::enable(){
-    this->disabled = false;
-    update();
   }

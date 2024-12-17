@@ -1,6 +1,5 @@
-
 #include <static_element.h>
-#include <iostream>
+#include "log.h"
 
   void StaticElement::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
@@ -28,27 +27,6 @@
      SelectObject(memoryDc,oldBitmap);
      DeleteDC(memoryDc);
      ReleaseDC(this->parent,parentDc);
-  }
-
-  void StaticElement::update(){
-     InvalidateRect(this->handle,NULL,TRUE);
-  }
-
-  void StaticElement::updateParent(){
-
-    RECT rt;
-    rt.top = this->yPos;
-    rt.left = this->xPos;
-    rt.right = this->xSize+this->xPos;
-    rt.bottom = this->ySize+this->yPos;
-    InvalidateRect(this->parent,&rt,TRUE);
-  } 
-
-  void StaticElement::fullUpdate(){
-    
-     updateParent();
-     this->gotParentBitmap = false;
-     update();
   }
 
   void StaticElement::paint(HWND hwnd){      
@@ -184,33 +162,17 @@
 
   StaticElement::~StaticElement(){
      DestroyWindow(this->handle);
-     std::cout<<"StaticElement destroyed"<<std::endl;
+     LOG("StaticElement destroyed");
   }
 
-  int StaticElement::getX(){
-     return this->xPos;
-  }
-
-  int StaticElement::getY(){
-     return this->yPos;
-  }
-
-  int StaticElement::getWidth(){
-     return this->xSize;
-  }
-
-  int StaticElement::getHeight(){
-     return this->ySize;
-  }
-
-  void StaticElement::setParent(HWND parent){
+  void StaticElement::setParent(const HWND& parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
 
       SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
       SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)StaticElement::callbackProcedure);
 
-      std::cout<<"StaticElement created"<<std::endl;
+      LOG("StaticElement created");
   }
 
   void StaticElement::setText(const std::wstring& name){
@@ -257,7 +219,7 @@
     update();
   }
 
-  void StaticElement::changePosition(int x,int y){
+  void StaticElement::changePosition(const int& x,const int& y){
     
     this->xPos = x;
     this->yPos = y;
@@ -265,29 +227,4 @@
     if(this->backgroundColor.GetA() < 255){
       fullUpdate();
     }
-  }
-
-  void StaticElement::changeSize(int width,int height){
-    this->xSize = width;
-    this->ySize = height;
-    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
-    fullUpdate();
-  }
-
-  void StaticElement::show(){
-    ShowWindow(this->handle,SW_SHOW);
-  }
-
-  void StaticElement::hide(){
-    ShowWindow(this->handle,SW_HIDE);
-  }
-
-  void StaticElement::disable(){
-    this->disabled = true;
-    update();
-  }
-
-  void StaticElement::enable(){
-    this->disabled = false;
-    update();
   }

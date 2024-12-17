@@ -1,7 +1,7 @@
 
 #include <checkbox.h>
 #include <thread>
-#include <iostream>
+#include "log.h"
 
   void Checkbox::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
@@ -29,27 +29,6 @@
      SelectObject(memoryDc,oldBitmap);
      DeleteDC(memoryDc);
      ReleaseDC(this->parent,parentDc);
-  }
-
-  void Checkbox::update(){
-     InvalidateRect(this->handle,NULL,TRUE);
-  }
-
-  void Checkbox::updateParent(){
-
-    RECT rt;
-    rt.top = this->yPos;
-    rt.left = this->xPos;
-    rt.right = this->xSize+this->xPos;
-    rt.bottom = this->ySize+this->yPos;
-    InvalidateRect(this->parent,&rt,TRUE);
-  } 
-
-  void Checkbox::fullUpdate(){
-    
-     updateParent();
-     this->gotParentBitmap = false;
-     update();
   }
 
   void Checkbox::paint(HWND hwnd){      
@@ -181,33 +160,17 @@
 
   Checkbox::~Checkbox(){
      DestroyWindow(this->handle);
-     std::cout<<"Checkbox destroyed"<<std::endl;
+     LOG("Checkbox destroyed");
   }
 
-  int Checkbox::getX(){
-     return this->xPos;
-  }
-
-  int Checkbox::getY(){
-     return this->yPos;
-  }
-
-  int Checkbox::getWidth(){
-     return this->xSize;
-  }
-
-  int Checkbox::getHeight(){
-     return this->ySize;
-  }
-
-  void Checkbox::setParent(HWND parent){
+  void Checkbox::setParent(const HWND& parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
 
       SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
       SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)Checkbox::callbackProcedure);
 
-      std::cout<<"Checkbox created"<<std::endl;
+      LOG("Checkbox created");
   }
 
 
@@ -220,41 +183,6 @@
   void Checkbox::setBackgroundOffColor(int r,int g,int b,int a){
      
       this->backgroundOffColor.SetValue(Color::MakeARGB(a, r, g, b));
-    update();
-  }
-
-  void Checkbox::changePosition(int x,int y){
-    
-    this->xPos = x;
-    this->yPos = y;
-    SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    if(this->backgroundOffColor.GetA() < 255 || this->backgroundOnColor.GetA() < 255){
-     fullUpdate();
-    }
-  }
-
-  void Checkbox::changeSize(int width,int height){
-    this->xSize = width;
-    this->ySize = height;
-    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
-    fullUpdate();
-  }
-
-  void Checkbox::show(){
-    ShowWindow(this->handle,SW_SHOW);
-  }
-
-  void Checkbox::hide(){
-    ShowWindow(this->handle,SW_HIDE);
-  }
-
-  void Checkbox::disable(){
-    this->disabled = true;
-    update();
-  }
-
-  void Checkbox::enable(){
-    this->disabled = false;
     update();
   }
 

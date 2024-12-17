@@ -1,7 +1,5 @@
-
-#include <iostream>
-
 #include <frame.h>
+#include "log.h"
 
   void Frame::updateFrame(){
      InvalidateRect(this->handle,NULL,TRUE);
@@ -111,7 +109,7 @@
     wc.lpfnWndProc = frameProcedure;
 
     if(!RegisterClassW(&wc)){
-      std::cout<<"Failed to Register class closing.."<<std::endl;
+      LOG("Failed to Register class closing..");
       return;
     }
 

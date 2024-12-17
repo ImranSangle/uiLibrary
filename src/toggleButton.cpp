@@ -1,7 +1,7 @@
 
 #include <toggleButton.h>
 #include <thread>
-#include <iostream>
+#include "log.h"
 
   void ToggleButton::registerMouseCapure(HWND hwnd){
     TRACKMOUSEEVENT tme;
@@ -29,27 +29,6 @@
      SelectObject(memoryDc,oldBitmap);
      DeleteDC(memoryDc);
      ReleaseDC(this->parent,parentDc);
-  }
-
-  void ToggleButton::update(){
-     InvalidateRect(this->handle,NULL,TRUE);
-  }
-
-  void ToggleButton::updateParent(){
-
-    RECT rt;
-    rt.top = this->yPos;
-    rt.left = this->xPos;
-    rt.right = this->xSize+this->xPos;
-    rt.bottom = this->ySize+this->yPos;
-    InvalidateRect(this->parent,&rt,TRUE);
-  } 
-
-  void ToggleButton::fullUpdate(){
-    
-     updateParent();
-     this->gotParentBitmap = false;
-     update();
   }
 
   void ToggleButton::DrawCircle(Graphics& graphics,SolidBrush& brush,const Point& center, float radius){
@@ -197,33 +176,17 @@
 
   ToggleButton::~ToggleButton(){
      DestroyWindow(this->handle);
-     std::cout<<"ToggleButton destroyed"<<std::endl;
+     LOG("ToggleButton destroyed");
   }
 
-  int ToggleButton::getX(){
-     return this->xPos;
-  }
-
-  int ToggleButton::getY(){
-     return this->yPos;
-  }
-
-  int ToggleButton::getWidth(){
-     return this->xSize;
-  }
-
-  int ToggleButton::getHeight(){
-     return this->ySize;
-  }
-
-  void ToggleButton::setParent(HWND parent){
+  void ToggleButton::setParent(const HWND& parent){
       this->parent = parent;
       this->handle = CreateWindowExW(WS_EX_TRANSPARENT, L"static", L"",WS_VISIBLE | WS_CHILD,this->xPos,this->yPos,this->xSize,this->ySize,this->parent,(HMENU)2,NULL,NULL);
 
       SetWindowLongPtr(this->handle,GWLP_USERDATA,(LONG_PTR)this);
       SetWindowLongPtr(this->handle,GWLP_WNDPROC,(LONG_PTR)ToggleButton::callbackProcedure);
 
-      std::cout<<"toggleButton created"<<std::endl;
+      LOG("toggleButton created");
   }
 
 
@@ -247,39 +210,6 @@
   void ToggleButton::setBackgroundOffColor(int r,int g,int b,int a){
      this->backgroundOnColor.SetValue(Color::MakeARGB(a,r,g,b));
      update();
-  }
-
-  void ToggleButton::changePosition(int x,int y){
-    
-    this->xPos = x;
-    this->yPos = y;
-    SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
-    fullUpdate();
-  }
-
-  void ToggleButton::changeSize(int width,int height){
-    this->xSize = width;
-    this->ySize = height;
-    SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
-    fullUpdate();
-  }
-
-  void ToggleButton::show(){
-    ShowWindow(this->handle,SW_SHOW);
-  }
-
-  void ToggleButton::hide(){
-    ShowWindow(this->handle,SW_HIDE);
-  }
-
-  void ToggleButton::disable(){
-    this->disabled = true;
-    update();
-  }
-
-  void ToggleButton::enable(){
-    this->disabled = false;
-    update();
   }
 
   bool ToggleButton::buttonState(){

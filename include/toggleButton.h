@@ -9,19 +9,10 @@ using namespace Gdiplus;
 
 class ToggleButton : public Element{
   private:
-  int xPos;
-  int yPos;
-  int xSize;
-  int ySize;
-  HWND parent;
-  bool gotParentBitmap = false;
-  HBITMAP parentBitmap = NULL;
-  HWND handle;
   Color backgroundOnColor;
   Color backgroundOffColor;
   bool hover = false;
   bool switchOn = false;
-  bool disabled = false;
 
 public:
   void(*onChange)(ToggleButton*) = nullptr;
@@ -61,17 +52,11 @@ private:
 
   void getParentBitmap();
 
-  void update();
-
-  void updateParent();
-
-  void fullUpdate();
-
   void DrawCircle(Graphics&,SolidBrush&,const Point&,float);
 
   void paint(HWND hwnd); 
 
-  LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
+  LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) override;
   
   static LRESULT CALLBACK callbackProcedure(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
       ToggleButton* togglebutton = (ToggleButton*)(GetWindowLongPtr(hwnd,GWLP_USERDATA));
@@ -89,15 +74,7 @@ public:
 
   ~ToggleButton();
 
-  int getX() override;
-
-  int getY() override;
-
-  int getWidth() override;
-
-  int getHeight() override;
-
-  void setParent(HWND parent) override; 
+  void setParent(const HWND& parent) override; 
 
   void setBackgroundOnColor(int r,int g,int b);
 
@@ -106,18 +83,6 @@ public:
   void setBackgroundOnColor(int r,int g,int b,int a);
 
   void setBackgroundOffColor(int r,int g,int b,int a);
-
-  void changePosition(int x,int y) override;
-
-  void changeSize(int width,int height) override;
-
-  void show();
-
-  void hide();
-
-  void disable();
-
-  void enable();
 
   bool buttonState();
 
