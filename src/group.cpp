@@ -110,6 +110,7 @@
              this->onSize(this);
           }
           for(int i =0;i<this->childs.size();i++){
+             this->childs[i]->alignElement();
              this->childs[i]->update();
           }
       break;
@@ -159,6 +160,7 @@
 
   void Group::add(Element* element){
       element->setParent(this->handle);
+      element->setParentPtr(this);
 
       this->childs.push_back(element);
   }

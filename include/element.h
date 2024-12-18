@@ -10,9 +10,30 @@ class Element{
   int ySize;
   bool disabled = false;
   HWND parent;
+  Element* parentPtr;
   HWND handle;
   bool gotParentBitmap = false;
   HBITMAP parentBitmap = NULL;
+
+  bool alignCenterInParent = false;
+  bool alignHorizontalCenterInParent = false;
+  bool alignVerticalCenterInParent = false;
+  bool alignLeftInParent = false;
+  bool alignRightInParent = false;
+  bool alignTopInParent = false;
+  bool alignBottomInParent = false;
+
+  public:
+  enum{
+  AlignCenterInParent = 0,
+  AlignHorizontalCenterInParent,
+  AlignVerticalCenterInParent,
+  AlignLeftInParent,
+  AlignRightInParent,
+  AlignTopInParent,
+  AlignBottomInParent,
+  };
+  protected:
 
   virtual void updateParent() const;
 
@@ -34,11 +55,19 @@ class Element{
 
   virtual void fullUpdate();
 
+  virtual void align(const int& value);
+
+  virtual void alignElement();
+
   virtual void setParent(const HWND& parent);
+
+  virtual void setParentPtr(Element* ptr);
 
   virtual void changePosition(const int& x,const int& y);
   
   virtual void changeSize(const int& width,const int& height);
+
+  virtual Element* getParentPtr() const;
 
   virtual int getX() const;
 

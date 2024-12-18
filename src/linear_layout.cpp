@@ -162,6 +162,7 @@
              this->onSize(this);
           }
           for(int i =0;i<this->childs.size();i++){
+             this->childs[i]->alignElement();
              this->childs[i]->update();
           }
         }
@@ -212,6 +213,7 @@
 
   void LinearLayout::add(Element* element){
       element->setParent(this->handle);
+      element->setParentPtr(this);
 
       this->childs.push_back(element);
       element->changePosition(element->getX(),this->yLength);

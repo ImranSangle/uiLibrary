@@ -20,7 +20,78 @@ void Element::fullUpdate(){
      updateParent();
      this->gotParentBitmap = false;
      update();
-};
+}
+
+void Element::align(const int& value){
+  switch(value){
+    case Element::AlignCenterInParent:
+      this->alignCenterInParent = true;
+      this->alignLeftInParent = false;
+      this->alignRightInParent = false;
+      this->alignTopInParent = false;
+      this->alignBottomInParent = false;
+      this->alignHorizontalCenterInParent = false;
+      this->alignVerticalCenterInParent = false;
+    break;
+    case Element::AlignHorizontalCenterInParent:
+      this->alignHorizontalCenterInParent = true;
+      this->alignLeftInParent = false;
+      this->alignRightInParent = false;
+    break;
+    case Element::AlignVerticalCenterInParent:
+      this->alignVerticalCenterInParent = true;
+      this->alignTopInParent = false;
+      this->alignBottomInParent = false;
+    break;
+    case Element::AlignLeftInParent:
+      this->alignLeftInParent = true;
+      this->alignCenterInParent = false;
+      this->alignRightInParent = false;
+      this->alignHorizontalCenterInParent = false;
+    break;
+    case Element::AlignRightInParent:
+      this->alignRightInParent = true;
+      this->alignCenterInParent = false;
+      this->alignLeftInParent = false;
+      this->alignHorizontalCenterInParent = false;
+    break;
+    case Element::AlignTopInParent:
+      this->alignTopInParent = true;
+      this->alignCenterInParent = false;
+      this->alignBottomInParent = false;
+      this->alignVerticalCenterInParent = false;
+    break;
+    case Element::AlignBottomInParent:
+      this->alignBottomInParent = true;
+      this->alignCenterInParent = false;
+      this->alignTopInParent = false;
+      this->alignVerticalCenterInParent = false;
+    break;
+
+  }
+}
+
+void Element::alignElement(){
+  if(this->alignLeftInParent){
+    this->xPos = 0;
+  }
+  if(this->alignRightInParent){
+    this->xPos = this->getParentPtr()->getWidth()-this->xSize;
+  }
+  if(this->alignTopInParent){
+    this->yPos = 0;
+  }
+  if(this->alignBottomInParent){
+    this->yPos = this->getParentPtr()->getHeight()-this->ySize;
+  }
+  if(this->alignCenterInParent || this->alignHorizontalCenterInParent){
+    this->xPos = this->getParentPtr()->getWidth()/2-this->xSize/2;
+  }
+  if(this->alignCenterInParent || this->alignVerticalCenterInParent){
+    this->yPos = this->getParentPtr()->getHeight()/2-this->ySize/2;
+  }
+  SetWindowPos(this->handle,NULL,this->xPos,this->yPos,0,0,SWP_NOSIZE);
+}
 
 void Element::setParent(const HWND& parent){
      this->parent = parent;
@@ -31,6 +102,11 @@ void Element::setParent(const HWND& parent){
 
      LOG("Element Created");
 };
+
+void Element::setParentPtr(Element* ptr){
+   this->parentPtr = ptr; 
+   this->alignElement();
+}
 
 LRESULT CALLBACK Element::callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
    return DefWindowProcW(hwnd,msg,wp,lp);
@@ -49,6 +125,10 @@ void Element::changeSize(const int& width,const int& height){
     SetWindowPos(this->handle,NULL,0,0,this->xSize,this->ySize,SWP_NOMOVE);
     fullUpdate();
 };
+
+Element* Element::getParentPtr() const {
+  return this->parentPtr;
+}
 
 int Element::getX() const{
     return this->xPos;

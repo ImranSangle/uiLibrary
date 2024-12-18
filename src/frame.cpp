@@ -1,10 +1,6 @@
 #include <frame.h>
 #include "log.h"
 
-  void Frame::updateFrame(){
-     InvalidateRect(this->handle,NULL,TRUE);
-  }
-
   void Frame::paint(HWND hwnd){
     PAINTSTRUCT ps;
     HDC dc = BeginPaint(hwnd,&ps);
@@ -31,6 +27,9 @@
 
   }
 
+  void Frame::fullUpdate(){
+     this->update();
+  }
  
   LRESULT CALLBACK Frame::frameProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
     switch(msg){
@@ -63,14 +62,15 @@
       case WM_SIZE:
        {
          RECT rect;
-         GetWindowRect(this->handle,&rect);
+         GetClientRect(this->handle,&rect);
          this->xSize = rect.right-rect.left;
          this->ySize = rect.bottom-rect.top;
-         updateFrame();
+         this->update();
          if(this->onSize != nullptr){
             this->onSize(this);
          }
          for(int i =0;i<this->childs.size();i++){
+             this->childs[i]->alignElement();
              this->childs[i]->update();
          }
        }
@@ -144,30 +144,23 @@
 
   void Frame::add(Element* element){
       element->setParent(this->handle);
-      this->childs.push_back(element);
+      element->setParentPtr(this);
+      this->childs.emplace_back(element);
   }
 
   void Frame::setBackgroundColor(int r,int g,int b){
      
      this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
-    updateFrame();
+     this->update();
   }
 
   void Frame::setBackgroundImage(const wchar_t* path){
      this->backgroundImage = path;
-    updateFrame();
+     this->update();
   }
   
   HWND Frame::getHandle(){
      return this->handle;
-  }
-
-  int Frame::getWidth(){
-     return this->xSize;
-  }
-
-  int Frame::getHeight(){
-     return this->ySize;
   }
 
   void Frame::quit(){

@@ -85,6 +85,7 @@
        this->xSize = mesureRect.Width+(paddingRect.Width/10);
        this->ySize = mesureRect.Height;
        SetWindowPos(this->handle,NULL,this->xPos,this->yPos,this->xSize,this->ySize,SWP_NOZORDER);
+       this->alignElement();
        if(this->backgroundColor.GetA() < 255){
          updateParent();
          this->gotParentBitmap = false;

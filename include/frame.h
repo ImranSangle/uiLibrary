@@ -10,14 +10,9 @@
 
 using namespace Gdiplus;
 
-class Frame{
+class Frame : public Element{
   private:
   ULONG_PTR gdiplusToken;
-  HWND handle;
-  int xPos;
-  int yPos;
-  int xSize;
-  int ySize;
   std::vector<Element*> childs;
   std::wstring backgroundImage;
   Color backgroundColor;
@@ -29,10 +24,9 @@ public:
   bool hasTitlebar = false;
 private:
 
-  void updateFrame();
-  
   void paint(HWND hwnd);
 
+  void fullUpdate()override;
  
   LRESULT CALLBACK frameProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
 
@@ -61,10 +55,6 @@ public:
   void setBackgroundImage(const wchar_t* path);
 
   HWND getHandle();
-
-  int getWidth(); 
-  
-  int getHeight();
 
   void quit();
 
