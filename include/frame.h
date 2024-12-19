@@ -24,7 +24,7 @@ public:
   bool hasTitlebar = false;
 private:
 
-  void paint(HWND hwnd);
+  void paint(const HWND& hwnd);
 
   void fullUpdate()override;
  
@@ -42,20 +42,20 @@ private:
 
 public:
 
-  Frame(const std::wstring& name,int x,int y,int cx,int cy,bool titlebar);
+  Frame(const std::wstring& name,const int& x,const int& y,const int& cx,const int& cy,const bool& titlebar);
 
   ~Frame();
 
   void start();
 
-  void add(Element* element);
+  void add(Element* const element);
 
-  void setBackgroundColor(int r,int g,int b);
+  void setBackgroundColor(const int& r,const int& g,const int& b);
 
   void setBackgroundImage(const wchar_t* path);
 
-  HWND getHandle();
+  HWND getHandle()const;
 
-  void quit();
+  void quit()const;
 
 };

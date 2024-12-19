@@ -3,15 +3,6 @@
 #include <thread>
 #include "log.h"
 
-  void ToggleButton::registerMouseCapure(HWND hwnd){
-    TRACKMOUSEEVENT tme;
-    tme.cbSize = sizeof(TRACKMOUSEEVENT);
-    tme.dwFlags = TME_LEAVE;
-    tme.hwndTrack = hwnd;
-    TrackMouseEvent(&tme);
-
-  }
-  
   void ToggleButton::getParentBitmap(){
      
      if(this->parentBitmap != NULL){
@@ -31,7 +22,7 @@
      ReleaseDC(this->parent,parentDc);
   }
 
-  void ToggleButton::DrawCircle(Graphics& graphics,SolidBrush& brush,const Point& center, float radius){
+  void ToggleButton::DrawCircle(Graphics& graphics,SolidBrush& brush,const Point& center, float radius)const{
       // Calculate the top-left corner of the bounding rectangle
       float x = center.X - radius;
       float y = center.Y - radius;
@@ -40,7 +31,7 @@
       graphics.FillEllipse(&brush,boundingRect);
   }
 
-  void ToggleButton::paint(HWND hwnd){      
+  void ToggleButton::paint(const HWND& hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
      HDC memoryDc = CreateCompatibleDC(dc);
@@ -164,7 +155,7 @@
   }
   
 
-  ToggleButton::ToggleButton(HWND hwnd,int x,int y,int size){
+  ToggleButton::ToggleButton(const HWND& hwnd,const int& x,const int& y,const int& size){
      this->xPos = x;
      this->yPos = y;
      this->xSize = size*2;
@@ -190,28 +181,28 @@
   }
 
 
-  void ToggleButton::setBackgroundOnColor(int r,int g,int b){
+  void ToggleButton::setBackgroundOnColor(const int& r,const int& g,const int& b){
      
      this->backgroundOnColor.SetFromCOLORREF(RGB(r,g,b));
     update();
   }
 
-  void ToggleButton::setBackgroundOffColor(int r,int g,int b){
+  void ToggleButton::setBackgroundOffColor(const int& r,const int& g,const int& b){
      
      this->backgroundOffColor.SetFromCOLORREF(RGB(r,g,b));
     update();
   }
 
-  void ToggleButton::setBackgroundOnColor(int r,int g,int b,int a){
+  void ToggleButton::setBackgroundOnColor(const int& r,const int& g,const int& b,const int& a){
      this->backgroundOnColor.SetValue(Color::MakeARGB(a,r,g,b));
      update();
   }
 
-  void ToggleButton::setBackgroundOffColor(int r,int g,int b,int a){
+  void ToggleButton::setBackgroundOffColor(const int& r,const int& g,const int& b,const int& a){
      this->backgroundOnColor.SetValue(Color::MakeARGB(a,r,g,b));
      update();
   }
 
-  bool ToggleButton::buttonState(){
+  bool ToggleButton::buttonState()const{
     return this->switchOn;
   } 

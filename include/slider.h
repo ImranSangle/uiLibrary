@@ -27,15 +27,13 @@ public:
   void(*onChange)(Slider*) = nullptr;
 private:
 
-  void registerMouseCapure(HWND hwnd);
-
   void getParentBitmap();
 
-  float remap(const float&,const float&,const float&,const float&,const float&);
+  float remap(const float&,const float&,const float&,const float&,const float&)const;
 
-  void DrawCircle(Graphics&,SolidBrush&,const Point&,float);
+  void DrawCircle(Graphics&,SolidBrush&,const Point&,float)const;
 
-  void paint(HWND hwnd); 
+  void paint(const HWND& hwnd); 
 
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) override;
   
@@ -51,25 +49,25 @@ private:
 
 public: 
 
-  Slider(HWND hwnd,int x,int y,int size);
+  Slider(const HWND& hwnd,const int& x,const int& y,const int& size);
 
   ~Slider();
 
-  float getMin();
+  float getMin()const;
 
-  float getMax();
+  float getMax()const;
 
-  float getPosition();
+  float getPosition()const;
 
   void setParent(const HWND& parent) override; 
 
-  void setBackgroundColor(int r,int g,int b);
+  void setBackgroundColor(const int& r,const int& g,const int& b);
 
-  void setKnobColor(int r,int g,int b);
+  void setKnobColor(const int& r,const int& g,const int& b);
 
-  void setBackgroundColor(int r,int g,int b,int a);
+  void setBackgroundColor(const int& r,const int& g,const int& b,const int& a);
 
-  void setKnobColor(int r,int g,int b,int a);
+  void setKnobColor(const int& r,const int& g,const int& b,const int& a);
 
   void setMin(const float& value);
 

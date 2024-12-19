@@ -24,11 +24,9 @@ public:
   void(*onClick)(StaticElement*) = nullptr;
 private:
 
-  void registerMouseCapure(HWND hwnd);
-
   void getParentBitmap();
 
-  void paint(HWND hwnd); 
+  void paint(const HWND& hwnd); 
 
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) override;
   
@@ -44,7 +42,7 @@ private:
 
 public: 
 
-  StaticElement(HWND hwnd,int x,int y,int cx,int cy);
+  StaticElement(const HWND& hwnd,const int& x,const int& y,const int& cx,const int& cy);
 
   ~StaticElement();
 
@@ -54,15 +52,15 @@ public:
 
   void setText(const std::wstring& name);
 
-  std::wstring getText();
+  std::wstring getText()const;
 
-  void setTextColor(int r,int g,int b);
+  void setTextColor(const int& r,const int& g,const int& b);
 
-  void setTextSize(int size);
+  void setTextSize(const int& size);
 
-  void setBackgroundColor(int r,int g,int b,int a);
+  void setBackgroundColor(const int& r,const int& g,const int& b,const int& a);
 
-  void setBackgroundColor(int r,int g,int b);
+  void setBackgroundColor(const int& r,const int& g,const int& b);
 
   void setBackgroundImage(const wchar_t* path);
 

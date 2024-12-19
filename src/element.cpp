@@ -2,6 +2,15 @@
 #include <element.h>
 #include <windows.h>
 
+void Element::registerMouseCapure(const HWND& hwnd){
+  TRACKMOUSEEVENT tme;
+  tme.cbSize = sizeof(TRACKMOUSEEVENT);
+  tme.dwFlags = TME_LEAVE;
+  tme.hwndTrack = hwnd;
+  TrackMouseEvent(&tme);
+
+}
+
 void Element::update() const {
   InvalidateRect(this->handle,NULL,TRUE);
 }
@@ -103,7 +112,7 @@ void Element::setParent(const HWND& parent){
      LOG("Element Created");
 };
 
-void Element::setParentPtr(Element* ptr){
+void Element::setParentPtr(Element* const ptr){
    this->parentPtr = ptr; 
    this->alignElement();
 }

@@ -30,7 +30,7 @@ public:
   bool alignCenter = false;
 private:
 
-  static void hoverAnimation(InputBox* object){
+  static void hoverAnimation(InputBox* const object){
 
      HDC dc = GetDC(object->handle);
       
@@ -51,13 +51,11 @@ private:
      ReleaseDC(object->handle,dc);
   }
 
-  void registerMouseCapure(HWND hwnd);
-
   void getParentBitmap();
 
-  void handleKeyboardEvents(HWND hwnd,WPARAM wp);
+  void handleKeyboardEvents(const HWND& hwnd,const WPARAM& wp);
 
-  void paint(HWND hwnd); 
+  void paint(const HWND& hwnd); 
 
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) override;
 
@@ -73,7 +71,7 @@ private:
 
 public: 
 
-  InputBox(HWND hwnd,int x,int y,int cx,int cy);
+  InputBox(const HWND& hwnd,const int& x,const int& y,const int& cx,const int& cy);
 
   ~InputBox();
 
@@ -81,22 +79,22 @@ public:
 
   void setText(const std::wstring& name);
   
-  std::wstring getText();
+  std::wstring getText() const ;
 
   void setHint(const std::wstring& hint);
 
-  void setTextColor(int r,int g,int b);
+  void setTextColor(const int& r,const int& g,const int& b);
 
-  void setTextSize(int size);
+  void setTextSize(const int& size);
 
-  void setBackgroundColor(int r,int g,int b,int a);
+  void setBackgroundColor(const int& r,const int& g,const int& b,const int& a);
 
-  void setBackgroundColor(int r,int g,int b);
+  void setBackgroundColor(const int& r,const int& g,const int& b);
 
   void setBackgroundImage(const std::wstring& path);
 
   void setFont(const std::wstring& fontname);
 
-  bool isInputFocused();
+  bool isInputFocused() const;
 
 };

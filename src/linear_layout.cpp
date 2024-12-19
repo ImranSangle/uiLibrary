@@ -5,15 +5,6 @@
 #include <thread>
 #include "log.h"
 
-  void LinearLayout::registerMouseCapure(HWND hwnd){
-    TRACKMOUSEEVENT tme;
-    tme.cbSize = sizeof(TRACKMOUSEEVENT);
-    tme.dwFlags = TME_LEAVE;
-    tme.hwndTrack = hwnd;
-    TrackMouseEvent(&tme);
-
-  }
-
   void LinearLayout::getParentBitmap(){
      
      if(this->parentBitmap != NULL){
@@ -33,7 +24,7 @@
      ReleaseDC(this->parent,parentDc);
   }
 
-  void LinearLayout::updateScrollbar(){
+  void LinearLayout::updateScrollbar()const{
      
      HDC dc = GetDC(this->handle);
 
@@ -47,7 +38,7 @@
      ReleaseDC(this->handle,dc);
   }
 
-  void LinearLayout::scroll(WPARAM wp,int velocity){
+  void LinearLayout::scroll(const WPARAM& wp,const int& velocity){
 
          if((SHORT)HIWORD(wp) > 0){
            if(this->scrollbarYPosition > 0){
@@ -68,7 +59,7 @@
          }
   }
 
-  void LinearLayout::paint(HWND hwnd){      
+  void LinearLayout::paint(const HWND& hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
      HDC memoryDc = CreateCompatibleDC(dc);
@@ -183,7 +174,7 @@
   }
   
 
-  LinearLayout::LinearLayout(HWND hwnd,int x,int y,int cx,int cy){
+  LinearLayout::LinearLayout(const HWND& hwnd,const int& x,const int& y,const int& cx,const int& cy){
      this->xPos = x;
      this->yPos = y;
      this->xSize = cx;
@@ -197,7 +188,7 @@
      LOG("LinearLayout destroyed");
   }
 
-  std::vector<Element*> LinearLayout::getChilds(){
+  std::vector<Element*> LinearLayout::getChilds() const{
      return this->childs; 
   }
 
@@ -211,22 +202,22 @@
       LOG("LinearLayout created");
   }
 
-  void LinearLayout::add(Element* element){
+  void LinearLayout::add(Element* const element){
       element->setParent(this->handle);
       element->setParentPtr(this);
 
-      this->childs.push_back(element);
+      this->childs.emplace_back(element);
       element->changePosition(element->getX(),this->yLength);
       this->yLength+= element->getHeight()+this->padding;
   }
 
-  void LinearLayout::setBackgroundColor(int r,int g,int b,int a){
+  void LinearLayout::setBackgroundColor(const int& r,const int& g,const int& b,const int& a){
      
     this->backgroundColor.SetValue(Color::MakeARGB(a,r, g, b));
     update();
   }
 
-  void LinearLayout::setBackgroundColor(int r,int g,int b){
+  void LinearLayout::setBackgroundColor(const int& r,const int& g,const int& b){
     
     this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
     update();
@@ -238,7 +229,7 @@
     update();
   }
 
-  void LinearLayout::setPadding(int paddingAmount){
+  void LinearLayout::setPadding(const int& paddingAmount){
     this->padding = paddingAmount;
   }
 

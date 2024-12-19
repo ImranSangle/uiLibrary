@@ -35,6 +35,8 @@ class Element{
   };
   protected:
 
+  void registerMouseCapure(const HWND& hwnd);
+
   virtual void updateParent() const;
 
   virtual LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp);
@@ -61,7 +63,7 @@ class Element{
 
   virtual void setParent(const HWND& parent);
 
-  virtual void setParentPtr(Element* ptr);
+  virtual void setParentPtr(Element* const ptr);
 
   virtual void changePosition(const int& x,const int& y);
   

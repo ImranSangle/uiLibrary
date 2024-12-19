@@ -4,15 +4,6 @@
 #include <wingdi.h>
 #include "log.h"
 
-  void Progressbar::registerMouseCapure(HWND hwnd){
-    TRACKMOUSEEVENT tme;
-    tme.cbSize = sizeof(TRACKMOUSEEVENT);
-    tme.dwFlags = TME_LEAVE;
-    tme.hwndTrack = hwnd;
-    TrackMouseEvent(&tme);
-
-  }
-
   void Progressbar::getParentBitmap(){
      
      if(this->parentBitmap != NULL){
@@ -32,14 +23,14 @@
      ReleaseDC(this->parent,parentDc);
   }
 
-  float Progressbar::remap(const float& value,const float& a,const float& b,const float& c,const float& d){
+  float Progressbar::remap(const float& value,const float& a,const float& b,const float& c,const float& d)const{
       
       float t = (value-a)/(b-a); 
 
       return (c*(1.0f-t))+(d*t);
   }
 
-  void Progressbar::paint(HWND hwnd){      
+  void Progressbar::paint(const HWND& hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
      HDC memoryDc = CreateCompatibleDC(dc);
@@ -148,7 +139,7 @@
   }
   
 
-  Progressbar::Progressbar(HWND hwnd,int x,int y,int cx,int cy){
+  Progressbar::Progressbar(const HWND& hwnd,const int& x,const int& y,const int& cx,const int& cy){
      this->xPos = x;
      this->yPos = y;
      this->xSize = cx;
@@ -162,15 +153,15 @@
      LOG("Progressbar destroyed");
   }
 
-  float Progressbar::getMin(){
+  float Progressbar::getMin()const{
      return this->min;
   }
 
-  float Progressbar::getMax(){
+  float Progressbar::getMax()const{
      return this->max;
   }
 
-  float Progressbar::getProgress(){
+  float Progressbar::getProgress()const{
      return this->progress;
   }
 
@@ -184,13 +175,13 @@
       LOG("button created");
   }
 
-  void Progressbar::setBackgroundColor(int r,int g,int b,int a){
+  void Progressbar::setBackgroundColor(const int& r,const int& g,const int& b,const int& a){
      
     this->backgroundColor.SetValue(Color::MakeARGB(a,r, g, b));
     update();
   }
 
-  void Progressbar::setBackgroundColor(int r,int g,int b){
+  void Progressbar::setBackgroundColor(const int& r,const int& g,const int& b){
     
     this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
     update();
@@ -202,12 +193,12 @@
     update();
   }
 
-  void Progressbar::setBarColor(int r,int g,int b,int a){
+  void Progressbar::setBarColor(const int& r,const int& g,const int& b,const int& a){
      this->barColor.SetValue(Color::MakeARGB(r, g, b, a));
      update();
   }
 
-  void Progressbar::setBarColor(int r,int g,int b){
+  void Progressbar::setBarColor(const int& r,const int& g,const int& b){
      this->barColor.SetFromCOLORREF(RGB(r,g,b));
      update();
   }

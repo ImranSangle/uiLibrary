@@ -5,15 +5,6 @@
 #include <windef.h>
 #include <wingdi.h>
 
-  void Button::registerMouseCapure(HWND hwnd){
-    TRACKMOUSEEVENT tme;
-    tme.cbSize = sizeof(TRACKMOUSEEVENT);
-    tme.dwFlags = TME_LEAVE;
-    tme.hwndTrack = hwnd;
-    TrackMouseEvent(&tme);
-
-  }
-
   void Button::getParentBitmap(){
      
      if(this->parentBitmap != NULL){
@@ -33,7 +24,7 @@
      ReleaseDC(this->parent,parentDc);
   }
 
-  void Button::paint(HWND hwnd){      
+  void Button::paint(const HWND& hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
      HDC memoryDc = CreateCompatibleDC(dc);
@@ -161,7 +152,7 @@
   }
   
 
-  Button::Button(HWND hwnd,int x,int y,int cx,int cy){
+  Button::Button(const HWND& hwnd,const int& x,const int& y,const int& cx,const int& cy){
      this->xPos = x;
      this->yPos = y;
      this->xSize = cx;
@@ -197,24 +188,24 @@
      return this->text;
   }
 
-  void Button::setTextColor(int r,int g,int b){
+  void Button::setTextColor(const int& r,const int& g,const int& b){
      
      this->textColor.SetFromCOLORREF(RGB(r,g,b));
     update();
   }
 
-  void Button::setTextSize(int size){
+  void Button::setTextSize(const int& size){
     this->textSize = size;
     update();
   }
 
-  void Button::setBackgroundColor(int r,int g,int b,int a){
+  void Button::setBackgroundColor(const int& r,const int& g,const int& b,const int& a){
      
     this->backgroundColor.SetValue(Color::MakeARGB(a,r, g, b));
     update();
   }
 
-  void Button::setBackgroundColor(int r,int g,int b){
+  void Button::setBackgroundColor(const int& r,const int& g,const int& b){
     
     this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
     update();

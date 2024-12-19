@@ -23,11 +23,9 @@ public:
   void(*onSize)(Group*) = nullptr;
 private:
 
-  void registerMouseCapure(HWND hwnd);
-
   void getParentBitmap();
 
-  void paint(HWND hwnd); 
+  void paint(const HWND& hwnd); 
 
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) override;
   
@@ -43,23 +41,23 @@ private:
 
 public: 
 
-  Group(HWND hwnd,int x,int y,int cx,int cy);
+  Group(const HWND& hwnd,const int& x,const int& y,const int& cx,const int& cy);
 
   ~Group();
 
   std::vector<Element*> getChilds();
 
-  void add(Element* element);
+  void add(Element* const element);
 
   void setParent(const HWND& parent) override; 
 
   void changePosition(const int& x,const int& y) override;
 
-  void setBackgroundColor(int r,int g,int b,int a);
+  void setBackgroundColor(const int& r,const int& g,const int& b,const int& a);
 
-  void setBackgroundColor(int r,int g,int b);
+  void setBackgroundColor(const int& r,const int& g,const int& b);
 
   void setBackgroundImage(const std::wstring& path);
 
-  void setPadding(int paddingAmount);
+  void setPadding(const int& paddingAmount);
 };

@@ -3,15 +3,6 @@
 #include <thread>
 #include "log.h"
 
-  void Checkbox::registerMouseCapure(HWND hwnd){
-    TRACKMOUSEEVENT tme;
-    tme.cbSize = sizeof(TRACKMOUSEEVENT);
-    tme.dwFlags = TME_LEAVE;
-    tme.hwndTrack = hwnd;
-    TrackMouseEvent(&tme);
-
-  }
-  
   void Checkbox::getParentBitmap(){
      
      if(this->parentBitmap != NULL){
@@ -31,7 +22,7 @@
      ReleaseDC(this->parent,parentDc);
   }
 
-  void Checkbox::paint(HWND hwnd){      
+  void Checkbox::paint(const HWND& hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
      HDC memoryDc = CreateCompatibleDC(dc);
@@ -148,7 +139,7 @@
   }
   
 
-  Checkbox::Checkbox(HWND hwnd,int x,int y,int size){
+  Checkbox::Checkbox(const HWND& hwnd,const int& x,const int& y,const int& size){
      this->xPos = x;
      this->yPos = y;
      this->xSize = size;
@@ -174,13 +165,13 @@
   }
 
 
-  void Checkbox::setBackgroundOnColor(int r,int g,int b,int a){
+  void Checkbox::setBackgroundOnColor(const int& r,const int& g,const int& b,const int& a){
      
       this->backgroundOnColor.SetValue(Color::MakeARGB(a, r, g, b));
     update();
   }
 
-  void Checkbox::setBackgroundOffColor(int r,int g,int b,int a){
+  void Checkbox::setBackgroundOffColor(const int& r,const int& g,const int& b,const int& a){
      
       this->backgroundOffColor.SetValue(Color::MakeARGB(a, r, g, b));
     update();

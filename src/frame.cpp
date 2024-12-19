@@ -1,7 +1,7 @@
 #include <frame.h>
 #include "log.h"
 
-  void Frame::paint(HWND hwnd){
+  void Frame::paint(const HWND& hwnd){
     PAINTSTRUCT ps;
     HDC dc = BeginPaint(hwnd,&ps);
 
@@ -91,7 +91,7 @@
     return (LRESULT) nullptr;
   }
 
-  Frame::Frame(const std::wstring& name,int x,int y,int cx,int cy,bool titlebar){
+  Frame::Frame(const std::wstring& name,const int& x,const int& y,const int& cx,const int& cy,const bool& titlebar){
     this->xPos = x;
     this->yPos = y;
     this->xSize = cx;
@@ -142,13 +142,13 @@
     }
   }
 
-  void Frame::add(Element* element){
+  void Frame::add(Element* const element){
       element->setParent(this->handle);
       element->setParentPtr(this);
       this->childs.emplace_back(element);
   }
 
-  void Frame::setBackgroundColor(int r,int g,int b){
+  void Frame::setBackgroundColor(const int& r,const int& g,const int& b){
      
      this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
      this->update();
@@ -159,10 +159,10 @@
      this->update();
   }
   
-  HWND Frame::getHandle(){
+  HWND Frame::getHandle()const{
      return this->handle;
   }
 
-  void Frame::quit(){
+  void Frame::quit()const{
      PostQuitMessage(0);
   }

@@ -3,15 +3,6 @@
 #include <wingdi.h>
 #include "log.h"
 
-  void Group::registerMouseCapure(HWND hwnd){
-    TRACKMOUSEEVENT tme;
-    tme.cbSize = sizeof(TRACKMOUSEEVENT);
-    tme.dwFlags = TME_LEAVE;
-    tme.hwndTrack = hwnd;
-    TrackMouseEvent(&tme);
-
-  }
-
   void Group::getParentBitmap(){
      
      if(this->parentBitmap != NULL){
@@ -31,7 +22,7 @@
      ReleaseDC(this->parent,parentDc);
   }
 
-  void Group::paint(HWND hwnd){      
+  void Group::paint(const HWND& hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
      HDC memoryDc = CreateCompatibleDC(dc);
@@ -130,7 +121,7 @@
   }
   
 
-  Group::Group(HWND hwnd,int x,int y,int cx,int cy){
+  Group::Group(const HWND& hwnd,const int& x,const int& y,const int& cx,const int& cy){
      this->xPos = x;
      this->yPos = y;
      this->xSize = cx;
@@ -158,20 +149,20 @@
       LOG("Group created");
   }
 
-  void Group::add(Element* element){
+  void Group::add(Element* const element){
       element->setParent(this->handle);
       element->setParentPtr(this);
 
-      this->childs.push_back(element);
+      this->childs.emplace_back(element);
   }
 
-  void Group::setBackgroundColor(int r,int g,int b,int a){
+  void Group::setBackgroundColor(const int& r,const int& g,const int& b,const int& a){
      
     this->backgroundColor.SetValue(Color::MakeARGB(a,r, g, b));
     update();
   }
 
-  void Group::setBackgroundColor(int r,int g,int b){
+  void Group::setBackgroundColor(const int& r,const int& g,const int& b){
     
     this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
     update();
@@ -183,7 +174,7 @@
     update();
   }
 
-  void Group::setPadding(int paddingAmount){
+  void Group::setPadding(const int& paddingAmount){
     this->padding = paddingAmount;
   }
 

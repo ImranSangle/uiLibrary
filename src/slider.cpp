@@ -4,15 +4,6 @@
 #include <string>
 #include "log.h"
 
-  void Slider::registerMouseCapure(HWND hwnd){
-    TRACKMOUSEEVENT tme;
-    tme.cbSize = sizeof(TRACKMOUSEEVENT);
-    tme.dwFlags = TME_LEAVE;
-    tme.hwndTrack = hwnd;
-    TrackMouseEvent(&tme);
-
-  }
-  
   void Slider::getParentBitmap(){
      
      if(this->parentBitmap != NULL){
@@ -32,14 +23,14 @@
      ReleaseDC(this->parent,parentDc);
   }
 
-  float Slider::remap(const float& value,const float& a,const float& b,const float& c,const float& d){
+  float Slider::remap(const float& value,const float& a,const float& b,const float& c,const float& d)const{
       
       float t = (value-a)/(b-a); 
 
       return (c*(1.0f-t))+(d*t);
   }
 
-  void Slider::DrawCircle(Graphics& graphics,SolidBrush& brush,const Point& center, float radius){
+  void Slider::DrawCircle(Graphics& graphics,SolidBrush& brush,const Point& center, float radius)const{
       // Calculate the top-left corner of the bounding rectangle
       float x = center.X - radius;
       float y = center.Y - radius;
@@ -48,7 +39,7 @@
       graphics.FillEllipse(&brush,boundingRect);
   }
 
-  void Slider::paint(HWND hwnd){      
+  void Slider::paint(const HWND& hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
      HDC memoryDc = CreateCompatibleDC(dc);
@@ -187,7 +178,7 @@
   }
   
 
-  Slider::Slider(HWND hwnd,int x,int y,int size){
+  Slider::Slider(const HWND& hwnd,const int& x,const int& y,const int& size){
      this->xPos = x;
      this->yPos = y;
      this->xSize = size;
@@ -202,15 +193,15 @@
      LOG("Slider destroyed");
   }
 
-  float Slider::getMin(){
+  float Slider::getMin()const{
      return this->min;
   }
 
-  float Slider::getMax(){
+  float Slider::getMax()const{
      return this->max;
   }
 
-  float Slider::getPosition(){
+  float Slider::getPosition()const{
      return this->position;
   }
 
@@ -225,24 +216,24 @@
   }
 
 
-  void Slider::setBackgroundColor(int r,int g,int b){
+  void Slider::setBackgroundColor(const int& r,const int& g,const int& b){
      
      this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
     update();
   }
 
-  void Slider::setKnobColor(int r,int g,int b){
+  void Slider::setKnobColor(const int& r,const int& g,const int& b){
      
      this->knobColor.SetFromCOLORREF(RGB(r,g,b));
     update();
   }
 
-  void Slider::setBackgroundColor(int r,int g,int b,int a){
+  void Slider::setBackgroundColor(const int& r,const int& g,const int& b,const int& a){
      this->backgroundColor.SetValue(Color::MakeARGB(a,r,g,b));
      update();
   }
 
-  void Slider::setKnobColor(int r,int g,int b,int a){
+  void Slider::setKnobColor(const int& r,const int& g,const int& b,const int& a){
      this->knobColor.SetValue(Color::MakeARGB(a,r,g,b));
      update();
   }

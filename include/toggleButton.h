@@ -18,7 +18,7 @@ public:
   void(*onChange)(ToggleButton*) = nullptr;
 private:
 
-  static void hoverAnimation(ToggleButton* object){
+  static void hoverAnimation(ToggleButton* const object){
 
      HDC dc = GetDC(object->handle);
       
@@ -48,13 +48,11 @@ private:
      ReleaseDC(object->handle,dc);
   }
 
-  void registerMouseCapure(HWND hwnd);
-
   void getParentBitmap();
 
-  void DrawCircle(Graphics&,SolidBrush&,const Point&,float);
+  void DrawCircle(Graphics&,SolidBrush&,const Point&,float)const;
 
-  void paint(HWND hwnd); 
+  void paint(const HWND& hwnd); 
 
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) override;
   
@@ -70,20 +68,20 @@ private:
 
 public: 
 
-  ToggleButton(HWND hwnd,int x,int y,int size);
+  ToggleButton(const HWND& hwnd,const int& x,const int& y,const int& size);
 
   ~ToggleButton();
 
   void setParent(const HWND& parent) override; 
 
-  void setBackgroundOnColor(int r,int g,int b);
+  void setBackgroundOnColor(const int& r,const int& g,const int& b);
 
-  void setBackgroundOffColor(int r,int g,int b);
+  void setBackgroundOffColor(const int& r,const int& g,const int& b);
 
-  void setBackgroundOnColor(int r,int g,int b,int a);
+  void setBackgroundOnColor(const int& r,const int& g,const int& b,const int& a);
 
-  void setBackgroundOffColor(int r,int g,int b,int a);
+  void setBackgroundOffColor(const int& r,const int& g,const int& b,const int& a);
 
-  bool buttonState();
+  bool buttonState()const;
 
 };

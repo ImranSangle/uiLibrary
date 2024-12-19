@@ -18,7 +18,7 @@ public:
   void(*onChange)(Checkbox*) = nullptr;
 private:
 
-  static void hoverAnimation(Checkbox* object){
+  static void hoverAnimation(Checkbox* const object){
 
      HDC dc = GetDC(object->handle);
       
@@ -41,11 +41,9 @@ private:
      ReleaseDC(object->handle,dc);
   }
 
-  void registerMouseCapure(HWND hwnd);
-
   void getParentBitmap();
 
-  void paint(HWND hwnd); 
+  void paint(const HWND& hwnd); 
 
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) override;
   
@@ -61,15 +59,15 @@ private:
 
 public: 
 
-  Checkbox(HWND hwnd,int x,int y,int size);
+  Checkbox(const HWND& hwnd,const int& x,const int& y,const int& size);
 
   ~Checkbox();
 
   void setParent(const HWND& parent) override; 
 
-  void setBackgroundOnColor(int r,int g,int b,int a);
+  void setBackgroundOnColor(const int& r,const int& g,const int& b,const int& a);
 
-  void setBackgroundOffColor(int r,int g,int b,int a);
+  void setBackgroundOffColor(const int& r,const int& g,const int& b,const int& a);
 
   bool buttonState();
 

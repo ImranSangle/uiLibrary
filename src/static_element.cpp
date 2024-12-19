@@ -1,15 +1,6 @@
 #include <static_element.h>
 #include "log.h"
 
-  void StaticElement::registerMouseCapure(HWND hwnd){
-    TRACKMOUSEEVENT tme;
-    tme.cbSize = sizeof(TRACKMOUSEEVENT);
-    tme.dwFlags = TME_LEAVE;
-    tme.hwndTrack = hwnd;
-    TrackMouseEvent(&tme);
-
-  }
-
   void StaticElement::getParentBitmap(){
      
      if(this->parentBitmap != NULL){
@@ -29,7 +20,7 @@
      ReleaseDC(this->parent,parentDc);
   }
 
-  void StaticElement::paint(HWND hwnd){      
+  void StaticElement::paint(const HWND& hwnd){      
      PAINTSTRUCT ps;
      HDC dc = BeginPaint(hwnd, &ps);
      HDC memoryDc = CreateCompatibleDC(dc);
@@ -149,7 +140,7 @@
   }
   
 
-  StaticElement::StaticElement(HWND hwnd,int x,int y,int cx,int cy){
+  StaticElement::StaticElement(const HWND& hwnd,const int& x,const int& y,const int& cx,const int& cy){
      this->xPos = x;
      this->yPos = y;
      this->xSize = cx;
@@ -182,28 +173,28 @@
     update();
   }
 
-  std::wstring StaticElement::getText(){
+  std::wstring StaticElement::getText()const{
      return this->text;
   }
 
-  void StaticElement::setTextColor(int r,int g,int b){
+  void StaticElement::setTextColor(const int& r,const int& g,const int& b){
      
      this->textColor.SetFromCOLORREF(RGB(r,g,b));
     update();
   }
 
-  void StaticElement::setTextSize(int size){
+  void StaticElement::setTextSize(const int& size){
     this->textSize = size;
     update();
   }
 
-  void StaticElement::setBackgroundColor(int r,int g,int b,int a){
+  void StaticElement::setBackgroundColor(const int& r,const int& g,const int& b,const int& a){
      
     this->backgroundColor.SetValue(Color::MakeARGB(a,r, g, b));
     update();
   }
 
-  void StaticElement::setBackgroundColor(int r,int g,int b){
+  void StaticElement::setBackgroundColor(const int& r,const int& g,const int& b){
     
     this->backgroundColor.SetFromCOLORREF(RGB(r,g,b));
     update();

@@ -27,15 +27,13 @@ public:
   void(*onSize)(LinearLayout*) = nullptr;
 private:
 
-  void registerMouseCapure(HWND hwnd);
-
   void getParentBitmap();
 
-  void updateScrollbar();
+  void updateScrollbar()const;
 
-  void scroll(WPARAM wp,int velocity);
+  void scroll(const WPARAM& wp,const int& velocity);
 
-  void paint(HWND hwnd); 
+  void paint(const HWND& hwnd); 
 
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) override;
   
@@ -49,7 +47,7 @@ private:
       }
   }
 
- static void scrollWorker(LinearLayout* layout){
+ static void scrollWorker(LinearLayout* const layout){
     
     while(layout->scrollVelocity > 0){
       layout->scroll(layout->scrollDirection,layout->scrollVelocity);
@@ -60,24 +58,24 @@ private:
 
 public: 
 
-  LinearLayout(HWND hwnd,int x,int y,int cx,int cy);
+  LinearLayout(const HWND& hwnd,const int& x,const int& y,const int& cx,const int& cy);
 
   ~LinearLayout();
 
-  std::vector<Element*> getChilds();
+  std::vector<Element*> getChilds() const;
 
-  void add(Element* element);
+  void add(Element* const element);
 
   void setParent(const HWND& parent) override; 
 
   void changePosition(const int& x,const int& y) override;
 
-  void setBackgroundColor(int r,int g,int b,int a);
+  void setBackgroundColor(const int& r,const int& g,const int& b,const int& a);
 
-  void setBackgroundColor(int r,int g,int b);
+  void setBackgroundColor(const int& r,const int& g,const int& b);
 
   void setBackgroundImage(const std::wstring& path);
 
-  void setPadding(int paddingAmount);
+  void setPadding(const int& paddingAmount);
 
 };

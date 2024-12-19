@@ -25,13 +25,11 @@ public:
   void(*onClick)(Progressbar*) = nullptr;
 private:
 
-  void registerMouseCapure(HWND hwnd);
-
   void getParentBitmap();
 
-  float remap(const float&,const float&,const float&,const float&,const float&);
+  float remap(const float&,const float&,const float&,const float&,const float&)const;
 
-  void paint(HWND hwnd); 
+  void paint(const HWND& hwnd); 
 
   LRESULT CALLBACK callbackProcedureImplementation(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp) override;
   
@@ -47,27 +45,27 @@ private:
 
 public: 
 
-  Progressbar(HWND hwnd,int x,int y,int cx,int cy);
+  Progressbar(const HWND& hwnd,const int& x,const int& y,const int& cx,const int& cy);
 
   ~Progressbar();
 
-  float getMin();
+  float getMin()const;
 
-  float getMax();
+  float getMax()const;
 
-  float getProgress();
+  float getProgress()const;
 
   void setParent(const HWND& parent) override; 
 
-  void setBackgroundColor(int r,int g,int b,int a);
+  void setBackgroundColor(const int& r,const int& g,const int& b,const int& a);
 
-  void setBackgroundColor(int r,int g,int b);
+  void setBackgroundColor(const int& r,const int& g,const int& b);
 
   void setBackgroundImage(const std::wstring& path);
 
-  void setBarColor(int r,int g,int b,int a);
+  void setBarColor(const int& r,const int& g,const int& b,const int& a);
 
-  void setBarColor(int r,int g,int b);
+  void setBarColor(const int& r,const int& g,const int& b);
 
   void setMin(const float& value);
 
