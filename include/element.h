@@ -23,7 +23,16 @@ class Element{
   bool alignTopInParent = false;
   bool alignBottomInParent = false;
 
+  int margin= 0;
+  int marginLeft = 0;
+  int marginRight = 0;
+  int marginTop = 0;
+  int marginBottom = 0;
+
   public:
+  bool matchParentWidth = false;
+  bool matchParentHeight = false;
+
   enum{
   AlignCenterInParent = 0,
   AlignHorizontalCenterInParent,
@@ -60,6 +69,14 @@ class Element{
   virtual void align(const int& value);
 
   virtual void alignElement();
+
+  void setMarginLeft(const int& value);
+
+  void setMarginRight(const int& value);
+
+  void setMarginTop(const int& value);
+
+  void setMarginBottom(const int& value);
 
   virtual void setParent(const HWND& parent);
 
