@@ -41,6 +41,7 @@ class Element{
   AlignRightInParent,
   AlignTopInParent,
   AlignBottomInParent,
+  AlignNoAlign
   };
   protected:
 
@@ -60,15 +61,17 @@ class Element{
       }
   }
 
-  public:
-
   virtual void update() const;
 
   virtual void fullUpdate();
 
+  virtual void alignElement();
+
+  public:
+
   virtual void align(const int& value);
 
-  virtual void alignElement();
+  virtual void removeAlign(const int& value);
 
   void setMarginLeft(const int& value);
 
@@ -105,4 +108,10 @@ class Element{
   virtual void enable();
 
   virtual ~Element();
+
+  friend class Frame;
+
+  friend class LinearLayout;
+
+  friend class Group;
 };

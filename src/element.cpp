@@ -80,6 +80,42 @@ void Element::align(const int& value){
   }
 }
 
+void Element::removeAlign(const int& value){
+  switch(value){
+    case Element::AlignNoAlign:
+      this->alignCenterInParent = false;
+      this->alignLeftInParent = false;
+      this->alignRightInParent = false;
+      this->alignTopInParent = false;
+      this->alignBottomInParent = false;
+      this->alignHorizontalCenterInParent = false;
+      this->alignVerticalCenterInParent = false;
+    break;
+    case Element::AlignCenterInParent:
+      this->alignCenterInParent = false;
+    break;
+    case Element::AlignHorizontalCenterInParent:
+      this->alignHorizontalCenterInParent = false;
+    break;
+    case Element::AlignVerticalCenterInParent:
+      this->alignVerticalCenterInParent = false;
+    break;
+    case Element::AlignLeftInParent:
+      this->alignLeftInParent = false;
+    break;
+    case Element::AlignRightInParent:
+      this->alignRightInParent = false;
+    break;
+    case Element::AlignTopInParent:
+      this->alignTopInParent = false;
+    break;
+    case Element::AlignBottomInParent:
+      this->alignBottomInParent = false;
+    break;
+
+  }
+}
+
 void Element::alignElement(){
   if(this->matchParentWidth){
     this->xSize = this->parentPtr->xSize-(this->marginLeft+this->marginRight);
@@ -105,7 +141,7 @@ void Element::alignElement(){
   if(this->alignCenterInParent || this->alignVerticalCenterInParent){
     this->yPos = this->parentPtr->ySize/2-this->ySize/2;
   }
-  SetWindowPos(this->handle,NULL,this->xPos,this->yPos,this->xSize,this->ySize,SWP_SHOWWINDOW);
+  SetWindowPos(this->handle,NULL,this->xPos,this->yPos,this->xSize,this->ySize,SWP_NOZORDER);
 }
 
 void Element::setMarginLeft(const int& value){
